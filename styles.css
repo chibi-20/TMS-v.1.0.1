@@ -1,0 +1,278 @@
+:root {
+  --primary-color: #800000;
+  --accent-color: #FFD700;
+  --dark: #000000;
+  --light: #ffffff;
+  --gray: #f8f8f8;
+  --shadow: rgba(0, 0, 0, 0.08);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--gray);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  margin: auto;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: var(--light);
+  padding: 20px 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  text-align: center;
+  box-shadow: 0 4px 8px var(--shadow);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+select, button, input {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(128, 0, 0, 0.15);
+}
+
+button {
+  background-color: var(--accent-color);
+  color: var(--dark);
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #e6c200;
+  transform: scale(1.02);
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 3px solid var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 14px 24px;
+  cursor: pointer;
+  background-color: var(--gray);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.tab:hover {
+  background-color: var(--accent-color);
+}
+
+.tab.active {
+  background-color: var(--primary-color);
+  color: var(--light);
+}
+
+.tab-content {
+  display: none;
+  padding: 30px;
+  background-color: var(--light);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ✅ Teacher card section */
+.teacher-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px var(--shadow);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.teacher-card:hover {
+  transform: translateY(-3px);
+}
+
+.teacher-header {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
+  padding: 18px 24px;
+  background-color: #fefefe;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.teacher-header > div {
+  padding: 6px 10px;
+}
+
+.teacher-details {
+  display: none;
+  background-color: #fffaf0;
+  padding: 20px 30px;
+  font-size: 15px;
+}
+
+.teacher-details h4 {
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+
+.teacher-details ul {
+  margin-left: 20px;
+  list-style-type: disc;
+  padding-left: 10px;
+}
+
+.toggle-btn {
+  background-color: var(--accent-color);
+  border: none;
+  padding: 8px 16px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #e6c200;
+}
+
+/* ✅ Form styling */
+form label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+form .form-group {
+  margin-bottom: 20px;
+}
+
+/* ✅ Responsive */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .teacher-header {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: left;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab {
+    border-radius: 0;
+  }
+
+  .tab-content {
+    padding: 20px;
+  }
+}
+.form-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--light);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+/* Ensure full height and center the content vertically and horizontally */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background-color: #f9f9f9;
+}
+
+/* Container that centers the form */
+.container.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* The actual form box */
+form#teacherForm {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+/* Other helpful styles */
+form#teacherForm label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+form#teacherForm input,
+form#teacherForm select,
+form#teacherForm button {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  box-sizing: border-box;
+}
+
+.entry-section, .degree-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+}
+
+.form-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+canvas {
+  width: 400px;
+  height: 250px;
+  display: block;
+  margin-bottom: 20px;
+  align-self: center;
+}

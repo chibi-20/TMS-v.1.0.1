@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Teacher</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+</head>
+<body>
+  <div class="container form-container">
+    <header>
+      <h1>👩‍🏫Register New Teacher</h1>
+    </header>
+
+    <form id="teacherForm" action="register_teacher.php" method="POST">
+      <label>Full Name:</label>
+      <input type="text" name="fullName" required />
+
+      <label>Position:</label>
+      <select name="position" required>
+        <option value="">-- Select Position --</option>
+        <option>Teacher I</option>
+        <option>Teacher II</option>
+        <option>Teacher III</option>
+        <option>Master Teacher I</option>
+        <option>Master Teacher II</option>
+        <option>Master Teacher III</option>
+        <option>Head Teacher I</option>
+        <option>Head Teacher II</option>
+        <option>Head Teacher III</option>
+        <option>Head Teacher IV</option>
+        <option>Head Teacher V</option>
+        <option>Head Teacher VI</option>
+        <option>Principal I</option>
+        <option>Principal II</option>
+        <option>Principal III</option>
+      </select>
+
+      <label>Years in Teaching:</label>
+      <input type="number" name="yearsInTeaching" min="0" required />
+
+      <label>IPCRF Rating:</label>
+      <input type="text" name="ipcrfRating" required />
+      
+      <label>School Year:</label>
+      <select name="schoolYear" required>
+        <option value="2023-2024">2023-2024</option>
+        <option value="2024-2025">2024-2025</option>
+      </select>
+
+      <!-- Trainings Attended Section -->
+      <section class="entry-section">
+        <h3>Trainings Attended</h3>
+        <div id="trainingList"></div>
+        <button type="button" id="addTrainingBtn">Add Training</button>
+      </section>
+
+      <!-- Educational Attainment Section -->
+      <section class="entry-section">
+        <h3>Educational Attainment</h3>
+
+        <!-- Bachelor's -->
+        <div class="degree-section">
+          <h4>Bachelor's Degree</h4>
+          <div id="bachelorList"></div>
+          <button type="button" class="addEducationBtn" data-type="bachelor">Add Bachelor's</button>
+        </div>
+
+        <!-- Master's -->
+        <div class="degree-section">
+          <h4>Master's Degree</h4>
+          <div id="masterList"></div>
+          <button type="button" class="addEducationBtn" data-type="master">Add Master's</button>
+        </div>
+
+        <!-- Doctoral -->
+        <div class="degree-section">
+          <h4>Doctoral Degree</h4>
+          <div id="doctoralList"></div>
+          <button type="button" class="addEducationBtn" data-type="doctoral">Add Doctoral</button>
+        </div>
+      </section>
+
+      <!-- Hidden fields to store structured JSON -->
+      <input type="hidden" name="trainingData" id="trainingData" />
+      <input type="hidden" name="educationData" id="educationData" />
+
+      <div class="form-buttons">
+        <button type="submit">Submit</button>
+        <button type="button" onclick="window.history.back()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="register.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JZGMNHS Teacher Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container dasboard-container">
+    <header>
+      <h1>JZGMNHS Teacher Management System</h1>
+      <div class="controls">
+        <select id="schoolYearSelect">
+          <option value="2023-2024">2023-2024</option>
+          <option value="2024-2025">2024-2025</option>
+        </select>
+        <button id="addTeacherBtn">+ Add Teacher</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="graphTab">Graph</button>
+      <button class="tab" data-tab="listTab">Teacher's List</button>
+    </nav>
+
+    <section id="graphTab" class="tab-content active">
+      <h2>Graph View</h2>
+      <!-- Position Bar Graph -->
+      <canvas id="positionBarChart"></canvas>
+      <!-- Years in Service Pie Graph -->
+      <canvas id="yearsPieChart"></canvas>
+      <!-- IPCRF Rating Pie Graph -->
+      <canvas id="ipcrfPieChart"></canvas>
+    </section>
+
+    <section id="listTab" class="tab-content">
+      <h2>Teacher's List</h2>
+      <div>
+        <label for="sortSelect">Sort by:</label>
+        <select id="sortSelect">
+          <option value="school_year">School Year</option>
+          <option value="years_in_teaching">Years of Service</option>
+          <option value="position">Position</option>
+          <option value="ipcrf_rating">IPCRF Rating</option>
+        </select>
+      </div>
+      <input type="text" id="teacherSearch" placeholder="Search teacher..." />
+      <div id="teacherList">
+        <table id="teacherTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">Full Name</th>
+              <th onclick="sortTable(1)">Position</th>
+              <th onclick="sortTable(2)">Years in Teaching</th>
+              <th onclick="sortTable(3)">IPCRF Rating</th>
+              <th onclick="sortTable(4)">School Year</th>
+              <th>Trainings Attended</th>
+              <th>Educational Attainment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

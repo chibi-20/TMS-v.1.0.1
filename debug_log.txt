@@ -1,0 +1,10 @@
+Array
+(
+    [fullName] => JING JING LAJO
+    [position] => Principal I
+    [yearsInTeaching] => 20
+    [ipcrfRating] => 5
+    [schoolYear] => 2023-2024
+    [trainingData] => [{"title":"hahahahahaHHAHAHAHA","date":"2016-10-30","level":"International"},{"title":"YOW PAPI","date":"2017-10-30","level":"International"}]
+    [educationData] => {"bachelor":[{"degree":"BSED","school":"UP","major":"MATH","year":"2007","status":"Graduated","details":"100"}],"master":[{"degree":"MAED","school":"UP","major":"MATH","year":"2015","status":"Graduated","details":"30"}],"doctoral":[{"degree":"PHD","school":"UP","major":"MATH","year":"2023","status":"Graduated","details":"30"}]}
+)
