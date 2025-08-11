@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTeachers(sortTeachers(teachersData, sortSelect.value));
       renderTeacherTable(teachersData); // Initial render for table
       renderCharts(teachersData); // Initial render for charts
+      renderSummaryTables(teachersData);
     })
     .catch(err => {
       console.error('Fetch error:', err);
@@ -148,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTeacherTable(filtered); // updates the table
     renderTeachers(sortTeachers(filtered, sortSelect.value)); // updates the card view
     renderCharts(filtered); // updates the graphs with filtered data
+    renderSummaryTables(filtered);
   });
 
   teacherSearch.addEventListener('input', () => {
@@ -167,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTeacherTable(filtered);
     renderTeachers(sortTeachers(filtered, sortSelect.value));
     renderCharts(filtered);
+    renderSummaryTables(filtered);
   });
 
   function sortTeachers(teachers, criteria) {
@@ -266,5 +269,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }]
       }
     });
+  }
+
+  function renderSummaryTables(teachers) {
+    // --- 1. Number of teachers per position ---
+    const positionCounts = {};
+    teachers.forEach(t => {
+      positionCounts[t.position] = (positionCounts[t.position] || 0) + 1;
+    });
+    let posTable = `<table border="1"><thead><tr><th>Position</th><th>Number of Teachers</th></tr></thead><tbody>`;
+    Object.entries(positionCounts).forEach(([pos, count]) => {
+      posTable += `<tr><td>${pos}</td><td>${count}</td></tr>`;
+    });
+    posTable += `</tbody></table>`;
+    const posDiv = document.getElementById('positionSummaryTable');
+    if (posDiv) posDiv.innerHTML = posTable;
+
+    // --- 2. Table: Position and Years of Service ---
+    // Group by position, then by years_in_teaching range
+    const yearRanges = ['0-5', '6-10', '11-15', '16-20', '21+'];
+    const posYearCounts = {};
+    teachers.forEach(t => {
+      if (!posYearCounts[t.position]) posYearCounts[t.position] = [0, 0, 0, 0, 0];
+      const y = Number(t.years_in_teaching);
+      let idx = 4;
+      if (y <= 5) idx = 0;
+      else if (y <= 10) idx = 1;
+      else if (y <= 15) idx = 2;
+      else if (y <= 20) idx = 3;
+      posYearCounts[t.position][idx]++;
+    });
+    let posYearTable = `<table border="1"><thead><tr><th>Position</th>`;
+    yearRanges.forEach(r => posYearTable += `<th>${r} yrs</th>`);
+    posYearTable += `</tr></thead><tbody>`;
+    Object.entries(posYearCounts).forEach(([pos, counts]) => {
+      posYearTable += `<tr><td>${pos}</td>`;
+      counts.forEach(c => posYearTable += `<td>${c}</td>`);
+      posYearTable += `</tr>`;
+    });
+    posYearTable += `</tbody></table>`;
+    const posYearDiv = document.getElementById('positionYearsTable');
+    if (posYearDiv) posYearDiv.innerHTML = posYearTable;
+
+    // --- 3. Table: Seminar/Training Attendance by Level ---
+    const seminarLevels = ['School-Based', 'Division', 'Region', 'National', 'International'];
+    const seminarCounts = { 'School-Based': 0, 'Division': 0, 'Region': 0, 'National': 0, 'International': 0 };
+    teachers.forEach(t => {
+      if (Array.isArray(t.trainings)) {
+        t.trainings.forEach(tr => {
+          if (seminarLevels.includes(tr.level)) seminarCounts[tr.level]++;
+        });
+      }
+    });
+    let seminarTable = `<table border="1"><thead><tr>`;
+    seminarLevels.forEach(lvl => seminarTable += `<th>${lvl}</th>`);
+    seminarTable += `</tr></thead><tbody><tr>`;
+    seminarLevels.forEach(lvl => seminarTable += `<td>${seminarCounts[lvl]}</td>`);
+    seminarTable += `</tr></tbody></table>`;
+    const seminarDiv = document.getElementById('seminarSummaryTable');
+    if (seminarDiv) seminarDiv.innerHTML = seminarTable;
+
+    // --- 4. Table: Degree Summary (Bachelor's only, Masteral, Doctoral) ---
+    let bachelorsOnly = 0, masteral = 0, doctoral = 0;
+    teachers.forEach(t => {
+      if (Array.isArray(t.education)) {
+        const hasDoctoral = t.education.some(e => e.type === 'doctoral');
+        const hasMaster = t.education.some(e => e.type === 'master');
+        if (hasDoctoral) doctoral++;
+        else if (hasMaster) masteral++;
+        else bachelorsOnly++;
+      } else {
+        bachelorsOnly++;
+      }
+    });
+    let degreeTable = `<table border="1"><thead><tr>
+      <th>Bachelor's Only</th><th>Masteral</th><th>Doctoral</th>
+      </tr></thead><tbody><tr>
+      <td>${bachelorsOnly}</td><td>${masteral}</td><td>${doctoral}</td>
+      </tr></tbody></table>`;
+    const degreeDiv = document.getElementById('degreeSummaryTable');
+    if (degreeDiv) degreeDiv.innerHTML = degreeTable;
   }
 });
