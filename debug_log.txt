@@ -1,10 +1,10 @@
 Array
 (
-    [fullName] => JING JING LAJO
-    [position] => Principal I
-    [yearsInTeaching] => 20
+    [fullName] => chibi
+    [position] => Teacher I
+    [yearsInTeaching] => 1
     [ipcrfRating] => 5
     [schoolYear] => 2023-2024
-    [trainingData] => [{"title":"hahahahahaHHAHAHAHA","date":"2016-10-30","level":"International"},{"title":"YOW PAPI","date":"2017-10-30","level":"International"}]
-    [educationData] => {"bachelor":[{"degree":"BSED","school":"UP","major":"MATH","year":"2007","status":"Graduated","details":"100"}],"master":[{"degree":"MAED","school":"UP","major":"MATH","year":"2015","status":"Graduated","details":"30"}],"doctoral":[{"degree":"PHD","school":"UP","major":"MATH","year":"2023","status":"Graduated","details":"30"}]}
+    [trainingData] => [{"title":"SLAC","date":"2025-07-07","level":"School-Based"},{"title":"INSET","date":"2025-08-04","level":"Division"},{"title":"RTOT","date":"2025-06-09","level":"Regional"}]
+    [educationData] => {"bachelor":[{"degree":"BSED","school":"LSPU","major":"VALUES","year":"2013","status":"Graduated","details":""}],"master":[],"doctoral":[]}
 )

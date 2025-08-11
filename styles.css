@@ -1,3 +1,83 @@
+/* Modern teacher table styles */
+#teacherTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 30px auto 40px auto;
+  background: #fff;
+  box-shadow: 0 2px 12px var(--shadow);
+  border-radius: 12px;
+  overflow: hidden;
+}
+#teacherTable th, #teacherTable td {
+  padding: 14px 18px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+#teacherTable th {
+  background: var(--primary-color);
+  color: var(--light);
+  font-weight: bold;
+  font-size: 1.08em;
+}
+#teacherTable tr:last-child td {
+  border-bottom: none;
+}
+#teacherTable tbody tr:hover {
+  background: #f9f9f9;
+}
+.delete-btn, .view-details-btn {
+  background: var(--accent-color);
+  color: var(--dark);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  margin: 2px 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.delete-btn:hover {
+  background: #e57373;
+  color: #fff;
+}
+.view-details-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #fff;
+  padding: 24px 32px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+#closeModal {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s;
+}
+#closeModal:hover {
+  color: var(--primary-color);
+}
 /* Center summary section headers */
 section h2, section h3 {
   text-align: center;

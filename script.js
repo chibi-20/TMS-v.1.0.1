@@ -86,10 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ['Bachelor', 'Masteral', 'Doctoral'].map(e => `<option value="${e}">${e}</option>`).join('');
       }
 
-      renderTeachers(sortTeachers(teachersData, sortSelect.value));
-      renderTeacherTable(teachersData); // Initial render for table
-      renderCharts(teachersData); // Initial render for charts
-      renderSummaryTables(teachersData);
+  // renderTeachers(sortTeachers(teachersData, sortSelect.value));
+  renderTeacherTable(teachersData); // Initial render for table
+  renderCharts(teachersData); // Initial render for charts
+  renderSummaryTables(teachersData);
     })
     .catch(err => {
       console.error('Fetch error:', err);
@@ -170,9 +170,77 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${teacher.school_year}</td>
         <td>${Array.isArray(teacher.trainings) ? teacher.trainings.map(t => t.title).join(', ') : ''}</td>
         <td>${Array.isArray(teacher.education) ? teacher.education.map(e => e.degree).join(', ') : ''}</td>
+        <td>
+          <button class="view-details-btn" data-id="${teacher.id}">View Details</button>
+          <button class="delete-btn" data-id="${teacher.id}">Delete</button>
+        </td>
       `;
       teacherTableBody.appendChild(tr);
     });
+
+    // Add event listeners for view details buttons
+    document.querySelectorAll('.view-details-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const teacherId = this.getAttribute('data-id');
+        const teacher = teachersData.find(t => String(t.id) === String(teacherId));
+        if (!teacher) return;
+        let trainingsHTML = Array.isArray(teacher.trainings) && teacher.trainings.length > 0
+          ? '<ul>' + teacher.trainings.map(t => `<li>${t.title} (${t.date} - ${t.level})</li>`).join('') + '</ul>'
+          : '<p>No training data.</p>';
+        let educationHTML = '';
+        if (Array.isArray(teacher.education) && teacher.education.length > 0) {
+          educationHTML = '<ul>' + teacher.education.map(e =>
+            `<li>${e.degree} in ${e.major} from ${e.school} (${e.year_attended})` +
+            (e.status ? ` - <em>${e.status}</em>` : '') +
+            (e.details ? ` - <u>${e.details}</u>` : '') +
+            '</li>'
+          ).join('') + '</ul>';
+        } else {
+          educationHTML = '<p>No educational data.</p>';
+        }
+        document.getElementById('modalBody').innerHTML =
+          `<h3>${teacher.full_name}</h3>
+           <h4>📚 Trainings Attended</h4>${trainingsHTML}
+           <h4>🎓 Educational Attainment</h4>${educationHTML}`;
+        document.getElementById('detailsModal').style.display = 'flex';
+      });
+    });
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const teacherId = this.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this teacher?')) {
+          fetch('delete_teacher.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: teacherId })
+          })
+          .then(res => res.json())
+          .then(result => {
+            if (result.success) {
+              // Remove from teachersData and re-render
+              teachersData = teachersData.filter(t => String(t.id) !== String(teacherId));
+              updateTeacherFilters();
+              alert('Teacher deleted successfully.');
+            } else {
+              alert('Failed to delete teacher.');
+            }
+          })
+          .catch(() => alert('Error deleting teacher.'));
+        }
+      });
+    });
+
+    // Modal close logic
+    const modal = document.getElementById('detailsModal');
+    const closeModal = document.getElementById('closeModal');
+    if (closeModal && modal) {
+      closeModal.onclick = () => { modal.style.display = 'none'; };
+      window.onclick = (event) => {
+        if (event.target === modal) modal.style.display = 'none';
+      };
+    }
   }
 
   // Helper to get filtered teachers by year, search, and position
@@ -235,10 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Unified filter update for year, search, and position
   function updateTeacherFilters() {
     const filtered = getFilteredTeachers();
-    renderTeacherTable(filtered);
-    renderTeachers(sortTeachers(filtered, sortSelect.value));
-    renderCharts(filtered);
-    renderSummaryTables(filtered);
+  renderTeacherTable(filtered);
+  // renderTeachers(sortTeachers(filtered, sortSelect.value));
+  renderCharts(filtered);
+  renderSummaryTables(filtered);
   }
 
   schoolYearSelect.addEventListener('change', updateTeacherFilters);
@@ -265,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   sortSelect.addEventListener('change', () => {
-    renderTeachers(sortTeachers(teachersData, sortSelect.value));
+    renderTeacherTable(sortTeachers(teachersData, sortSelect.value));
   });
 
   function capitalize(str) {
