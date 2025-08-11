@@ -1,3 +1,37 @@
+/* Center summary section headers */
+section h2, section h3 {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Centered and modern summary tables */
+.summary-table {
+  margin: 30px auto 40px auto;
+  border-collapse: collapse;
+  min-width: 350px;
+  max-width: 600px;
+  background: #fff;
+  box-shadow: 0 2px 12px var(--shadow);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.summary-table th, .summary-table td {
+  padding: 14px 18px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.summary-table th {
+  background: var(--primary-color);
+  color: var(--light);
+  font-weight: bold;
+  font-size: 1.08em;
+}
+.summary-table tr:last-child td {
+  border-bottom: none;
+}
+.summary-table tbody tr:hover {
+  background: #f9f9f9;
+}
 :root {
   --primary-color: #800000;
   --accent-color: #FFD700;

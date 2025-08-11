@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const teacherSearch = document.getElementById('teacherSearch');
   let teachersData = []; // Store fetched data globally
   let positionChart, yearsChart, ipcrfChart;
+  const positionFilter = document.getElementById('positionFilter');
+  const yearsFilter = document.getElementById('yearsFilter');
+  const trainingsFilter = document.getElementById('trainingsFilter');
+  const educationFilter = document.getElementById('educationFilter');
 
   // Fix: Add Teacher button working
   if (addBtn) {
@@ -53,6 +57,35 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       teachersData = teachers; // Save globally
+
+
+      // Populate position filter dropdown
+      if (positionFilter) {
+        const uniquePositions = Array.from(new Set(teachersData.map(t => t.position))).sort();
+        positionFilter.innerHTML = '<option value="">All Positions</option>' +
+          uniquePositions.map(pos => `<option value="${pos}">${pos}</option>`).join('');
+      }
+
+      // Populate years in service filter (ranges)
+      if (yearsFilter) {
+        const yearRanges = ['0-5', '6-10', '11-15', '16-20', '21+'];
+        yearsFilter.innerHTML = '<option value="">All Years in Service</option>' +
+          yearRanges.map(r => `<option value="${r}">${r} yrs</option>`).join('');
+      }
+
+      // Populate trainings filter (by level: School-Based, Division, Region, National, International)
+      if (trainingsFilter) {
+        const trainingLevels = ['School-Based', 'Division', 'Region', 'National', 'International'];
+        trainingsFilter.innerHTML = '<option value="">All Trainings</option>' +
+          trainingLevels.map(lvl => `<option value="${lvl}">${lvl}</option>`).join('');
+      }
+
+      // Populate education filter (Bachelor, Masteral, Doctoral)
+      if (educationFilter) {
+        educationFilter.innerHTML = '<option value="">All Educational Attainment</option>' +
+          ['Bachelor', 'Masteral', 'Doctoral'].map(e => `<option value="${e}">${e}</option>`).join('');
+      }
+
       renderTeachers(sortTeachers(teachersData, sortSelect.value));
       renderTeacherTable(teachersData); // Initial render for table
       renderCharts(teachersData); // Initial render for charts
@@ -142,21 +175,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Filter and render on school year change
-  schoolYearSelect.addEventListener('change', () => {
+  // Helper to get filtered teachers by year, search, and position
+  function getFilteredTeachers() {
     const selectedYear = schoolYearSelect.value;
-    const filtered = teachersData.filter(t => t.school_year === selectedYear);
-    renderTeacherTable(filtered); // updates the table
-    renderTeachers(sortTeachers(filtered, sortSelect.value)); // updates the card view
-    renderCharts(filtered); // updates the graphs with filtered data
-    renderSummaryTables(filtered);
-  });
-
-  teacherSearch.addEventListener('input', () => {
     const query = teacherSearch.value.trim().toLowerCase();
-    const selectedYear = schoolYearSelect.value;
+    const selectedPosition = positionFilter ? positionFilter.value : '';
+    const selectedYears = yearsFilter ? yearsFilter.value : '';
+    const selectedTraining = trainingsFilter ? trainingsFilter.value : '';
+    const selectedEducation = educationFilter ? educationFilter.value : '';
     let filtered = teachersData.filter(t => t.school_year === selectedYear);
-
+    if (selectedPosition) {
+      filtered = filtered.filter(t => t.position === selectedPosition);
+    }
+    if (selectedYears) {
+      filtered = filtered.filter(t => {
+        const y = Number(t.years_in_teaching);
+        if (selectedYears === '0-5') return y >= 0 && y <= 5;
+        if (selectedYears === '6-10') return y >= 6 && y <= 10;
+        if (selectedYears === '11-15') return y >= 11 && y <= 15;
+        if (selectedYears === '16-20') return y >= 16 && y <= 20;
+        if (selectedYears === '21+') return y >= 21;
+        return true;
+      });
+    }
+    if (selectedTraining) {
+      filtered = filtered.filter(t => Array.isArray(t.trainings) && t.trainings.some(tr => tr.level === selectedTraining));
+    }
+    if (selectedEducation) {
+      filtered = filtered.filter(t => {
+        if (!Array.isArray(t.education)) return false;
+        if (selectedEducation === 'Bachelor') {
+          // Only bachelor, no masteral or doctoral
+          return t.education.some(e => e.type === 'bachelor') &&
+            !t.education.some(e => e.type === 'master' || e.type === 'doctoral');
+        }
+        if (selectedEducation === 'Masteral') {
+          return t.education.some(e => e.type === 'master') &&
+            !t.education.some(e => e.type === 'doctoral');
+        }
+        if (selectedEducation === 'Doctoral') {
+          return t.education.some(e => e.type === 'doctoral');
+        }
+        return true;
+      });
+    }
     if (query) {
       filtered = filtered.filter(t =>
         t.full_name.toLowerCase().includes(query) ||
@@ -165,12 +227,26 @@ document.addEventListener('DOMContentLoaded', () => {
         String(t.ipcrf_rating).includes(query)
       );
     }
+    return filtered;
+  }
 
+  // Filter and render on school year change
+
+  // Unified filter update for year, search, and position
+  function updateTeacherFilters() {
+    const filtered = getFilteredTeachers();
     renderTeacherTable(filtered);
     renderTeachers(sortTeachers(filtered, sortSelect.value));
     renderCharts(filtered);
     renderSummaryTables(filtered);
-  });
+  }
+
+  schoolYearSelect.addEventListener('change', updateTeacherFilters);
+  teacherSearch.addEventListener('input', updateTeacherFilters);
+  if (positionFilter) positionFilter.addEventListener('change', updateTeacherFilters);
+  if (yearsFilter) yearsFilter.addEventListener('change', updateTeacherFilters);
+  if (trainingsFilter) trainingsFilter.addEventListener('change', updateTeacherFilters);
+  if (educationFilter) educationFilter.addEventListener('change', updateTeacherFilters);
 
   function sortTeachers(teachers, criteria) {
     return teachers.slice().sort((a, b) => {
@@ -277,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     teachers.forEach(t => {
       positionCounts[t.position] = (positionCounts[t.position] || 0) + 1;
     });
-    let posTable = `<table border="1"><thead><tr><th>Position</th><th>Number of Teachers</th></tr></thead><tbody>`;
+  let posTable = `<table class="summary-table"><thead><tr><th>Position</th><th>Number of Teachers</th></tr></thead><tbody>`;
     Object.entries(positionCounts).forEach(([pos, count]) => {
       posTable += `<tr><td>${pos}</td><td>${count}</td></tr>`;
     });
@@ -299,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (y <= 20) idx = 3;
       posYearCounts[t.position][idx]++;
     });
-    let posYearTable = `<table border="1"><thead><tr><th>Position</th>`;
+  let posYearTable = `<table class="summary-table"><thead><tr><th>Position</th>`;
     yearRanges.forEach(r => posYearTable += `<th>${r} yrs</th>`);
     posYearTable += `</tr></thead><tbody>`;
     Object.entries(posYearCounts).forEach(([pos, counts]) => {
@@ -321,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-    let seminarTable = `<table border="1"><thead><tr>`;
+  let seminarTable = `<table class="summary-table"><thead><tr>`;
     seminarLevels.forEach(lvl => seminarTable += `<th>${lvl}</th>`);
     seminarTable += `</tr></thead><tbody><tr>`;
     seminarLevels.forEach(lvl => seminarTable += `<td>${seminarCounts[lvl]}</td>`);
@@ -342,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bachelorsOnly++;
       }
     });
-    let degreeTable = `<table border="1"><thead><tr>
+    let degreeTable = `<table class="summary-table"><thead><tr>
       <th>Bachelor's Only</th><th>Masteral</th><th>Doctoral</th>
       </tr></thead><tbody><tr>
       <td>${bachelorsOnly}</td><td>${masteral}</td><td>${doctoral}</td>

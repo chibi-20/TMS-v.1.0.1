@@ -21,7 +21,7 @@
 
     <nav class="tabs">
       <button class="tab active" data-tab="graphTab">Graph</button>
-      <button class="tab" data-tab="listTab">Teacher's List</button>
+      <button class="tab" data-tab="listTab">Summary/Teacher's List</button>
     </nav>
 
     <section id="graphTab" class="tab-content active">
@@ -32,11 +32,19 @@
       <canvas id="yearsPieChart"></canvas>
       <!-- IPCRF Rating Pie Graph -->
       <canvas id="ipcrfPieChart"></canvas>
+    </section>
+    <section>
+      <h2>SUMMARY TABLES</h2>
+      <h3>Position</h3>
       <div id="positionSummaryTable"></div>
+      <h3>Years in Service</h3>
       <div id="positionYearsTable"></div>
+      <h3>Seminars Attended</h3>
       <div id="seminarSummaryTable"></div>
+      <h3>Educational Attainment</h3>
       <div id="degreeSummaryTable"></div>
     </section>
+
 
     <section id="listTab" class="tab-content">
       <h2>Teacher's List</h2>
@@ -50,6 +58,22 @@
         </select>
       </div>
       <input type="text" id="teacherSearch" placeholder="Search teacher..." />
+      <select id="positionFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Positions</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="yearsFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Years in Service</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="trainingsFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Trainings</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="educationFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Educational Attainment</option>
+        <!-- Populated dynamically -->
+      </select>
       <div id="teacherList">
         <table id="teacherTable">
           <thead>
