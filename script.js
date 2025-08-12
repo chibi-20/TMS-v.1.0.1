@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${teacher.years_in_teaching}</td>
         <td>${teacher.ipcrf_rating}</td>
         <td>${teacher.school_year}</td>
-        <td>${Array.isArray(teacher.trainings) ? teacher.trainings.map(t => t.title).join(', ') : ''}</td>
+        <td>${Array.isArray(teacher.trainings) ? getTrainingLevels(teacher.trainings) : ''}</td>
         <td>${Array.isArray(teacher.education) ? teacher.education.map(e => e.degree).join(', ') : ''}</td>
         <td>
           <button class="view-details-btn" data-id="${teacher.id}">View Details</button>
@@ -494,4 +494,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const degreeDiv = document.getElementById('degreeSummaryTable');
     if (degreeDiv) degreeDiv.innerHTML = degreeTable;
   }
+
+  // Add this function to categorize trainings by level
+  function getTrainingLevels(trainings) {
+    // Initialize counters for each level
+    const levels = {
+      'School-Based': 0,
+      'Division': 0,
+      'Regional': 0, 
+      'National': 0,
+      'International': 0
+    };
+    
+    // Count trainings by level
+    trainings.forEach(training => {
+      // Assuming each training object has a "level" property
+      // If your data structure is different, adjust accordingly
+      if (training.level && levels.hasOwnProperty(training.level)) {
+        levels[training.level]++;
+      }
+    });
+    
+    // Format the output as a string
+    return Object.entries(levels)
+      .filter(([_, count]) => count > 0)
+      .map(([level, count]) => `${level}: ${count}`)
+      .join('<br>');
+  }
+
+  // Then in your code that populates the table rows, replace the trainings cell content
+  // Instead of something like:
+  // cell.textContent = teacher.trainings.map(t => t.name).join(", ");
+  // Use:
+  // cell.innerHTML = getTrainingLevels(teacher.trainings);
 });
