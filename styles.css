@@ -86,14 +86,50 @@ section h2, section h3 {
 }
 /* Centered and modern summary tables */
 .summary-table {
-  margin: 30px auto 40px auto;
+  margin: 20px auto;
   border-collapse: collapse;
-  min-width: 350px;
-  max-width: 600px;
+  min-width: 300px;
+  max-width: 400px;
   background: #fff;
   box-shadow: 0 2px 12px var(--shadow);
   border-radius: 12px;
   overflow: hidden;
+}
+
+/* Horizontal layout for summary tables */
+.summary-tables-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+  margin: 20px 0;
+  padding: 0 10px;
+}
+
+.summary-table-item {
+  flex: 1;
+  min-width: 350px;
+  max-width: 500px;
+}
+
+/* First two tables in top row */
+.summary-table-item:nth-child(1),
+.summary-table-item:nth-child(2) {
+  flex-basis: calc(50% - 15px);
+  margin-bottom: 20px;
+}
+
+/* Bottom row: Seminars Attended and Educational Attainment side by side */
+.summary-table-item:nth-child(3),
+.summary-table-item:nth-child(4) {
+  flex-basis: calc(50% - 15px);
+}
+
+.summary-table-item h3 {
+  text-align: center;
+  margin: 15px 0;
+  color: var(--primary-color);
+  font-size: 1.1em;
 }
 .summary-table th, .summary-table td {
   padding: 14px 18px;
@@ -213,7 +249,7 @@ button:hover {
 }
 
 .tab-content {
-  display: none;
+  display: none !important;
   padding: 30px;
   background-color: var(--light);
   border-radius: 0 0 12px 12px;
@@ -221,7 +257,7 @@ button:hover {
 }
 
 .tab-content.active {
-  display: block;
+  display: block !important;
 }
 
 /* ✅ Teacher card section */
@@ -383,10 +419,32 @@ form#teacherForm button {
   gap: 1rem;
   justify-content: flex-end;
 }
+ 
+#graphTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.chart-wrapper {
+  width: 300px;
+  height: 300px;
+  position: relative;
+}
+
 canvas {
-  width: 400px;
-  height: 250px;
+  max-width: 100% !important;
+  max-height: 100% !important;
   display: block;
   margin-bottom: 20px;
-  align-self: center;
+  position: relative;
 }

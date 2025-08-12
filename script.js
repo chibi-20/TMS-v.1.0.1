@@ -24,10 +24,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // Tab switching
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
+      console.log('Tab clicked:', tab.dataset.tab);
       tabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById(tab.dataset.tab).classList.add('active');
+      console.log('Active tab set to:', tab.dataset.tab);
+      
+      // Handle chart rendering based on active tab
+      if (tab.dataset.tab === 'graphTab') {
+        // Render charts when graph tab is active
+        if (teachersData && teachersData.length > 0) {
+          renderCharts(teachersData);
+        }
+      } else {
+        // Destroy charts when not on graph tab
+        if (positionChart) {
+          positionChart.destroy();
+          positionChart = null;
+        }
+        if (yearsChart) {
+          yearsChart.destroy();
+          yearsChart = null;
+        }
+        if (ipcrfChart) {
+          ipcrfChart.destroy();
+          ipcrfChart = null;
+        }
+      }
     });
   });
 
@@ -88,7 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // renderTeachers(sortTeachers(teachersData, sortSelect.value));
   renderTeacherTable(teachersData); // Initial render for table
-  renderCharts(teachersData); // Initial render for charts
+  
+  // Only render charts if graph tab is active initially
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab && activeTab.dataset.tab === 'graphTab') {
+    renderCharts(teachersData); // Initial render for charts
+  }
+  
   renderSummaryTables(teachersData);
     })
     .catch(err => {
@@ -363,6 +393,33 @@ document.addEventListener('DOMContentLoaded', () => {
           data: positionData,
           backgroundColor: 'rgba(54, 162, 235, 0.6)'
         }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Teachers by Position',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 20
+            }
+          },
+          legend: {
+            display: true
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
       }
     });
 
@@ -389,6 +446,29 @@ document.addEventListener('DOMContentLoaded', () => {
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
           ]
         }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Years in Service Distribution',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 20
+            }
+          },
+          legend: {
+            display: true,
+            position: 'bottom'
+          }
+        }
       }
     });
 
@@ -411,6 +491,29 @@ document.addEventListener('DOMContentLoaded', () => {
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
           ]
         }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1,
+        plugins: {
+          title: {
+            display: true,
+            text: 'IPCRF Rating Distribution',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 20
+            }
+          },
+          legend: {
+            display: true,
+            position: 'bottom'
+          }
+        }
       }
     });
   }
