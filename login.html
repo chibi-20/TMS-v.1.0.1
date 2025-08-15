@@ -31,6 +31,15 @@
     }
     
     .login-form .logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px auto;
+      display: block;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .logo-fallback {
       font-size: 3em;
       margin-bottom: 20px;
     }
@@ -97,7 +106,8 @@
 <body>
   <div class="login-container">
     <div class="login-form">
-      <div class="logo">🏫</div>
+      <img src="assets/jzgmnhs-logo.png" alt="JZGMNHS Logo" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='block';">
+      <div class="logo-fallback" style="display: none;">🏫</div>
       <h1>JZGMNHS Teacher Management System</h1>
       
       <div id="errorMessage" class="error-message">
