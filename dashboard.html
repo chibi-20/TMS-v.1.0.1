@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JZGMNHS Teacher Management System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <div class="container dasboard-container">
+    <header>
+      <h1>JZGMNHS Teacher Management System</h1>
+      <div class="controls">
+        <select id="schoolYearSelect">
+          <option value="2023-2024">2023-2024</option>
+          <option value="2024-2025">2024-2025</option>
+        </select>
+        <button id="addTeacherBtn">+ Add Teacher</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="graphTab">Graph</button>
+      <button class="tab" data-tab="listTab">Summary/Teacher's List</button>
+    </nav>
+
+    <section id="graphTab" class="tab-content active">
+      <h2>Graph View</h2>
+      <div class="charts-container">
+        <!-- Position Bar Graph -->
+        <div class="chart-wrapper">
+          <canvas id="positionBarChart"></canvas>
+        </div>
+        <!-- Years in Service Pie Graph -->
+        <div class="chart-wrapper">
+          <canvas id="yearsPieChart"></canvas>
+        </div>
+        <!-- IPCRF Rating Pie Graph -->
+        <div class="chart-wrapper">
+          <canvas id="ipcrfPieChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="listTab" class="tab-content">
+      <h2>SUMMARY TABLES</h2>
+      <div class="summary-tables-container">
+        <div class="summary-table-item">
+          <h3>Position</h3>
+          <div id="positionSummaryTable"></div>
+        </div>
+        <div class="summary-table-item">
+          <h3>Years in Service</h3>
+          <div id="positionYearsTable"></div>
+        </div>
+        <div class="summary-table-item">
+          <h3>Seminars Attended</h3>
+          <div id="seminarSummaryTable"></div>
+        </div>
+        <div class="summary-table-item">
+          <h3>Educational Attainment</h3>
+          <div id="degreeSummaryTable"></div>
+        </div>
+      </div>
+
+      <h2>Teacher's List</h2>
+      <div>
+        <label for="sortSelect">Sort by:</label>
+        <select id="sortSelect">
+          <option value="school_year">School Year</option>
+          <option value="years_in_teaching">Years of Service</option>
+          <option value="position">Position</option>
+          <option value="ipcrf_rating">IPCRF Rating</option>
+        </select>
+      </div>
+      <input type="text" id="teacherSearch" placeholder="Search teacher..." />
+      <select id="positionFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Positions</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="yearsFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Years in Service</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="trainingsFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Trainings</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="educationFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Educational Attainment</option>
+        <!-- Populated dynamically -->
+      </select>
+      <div id="teacherList">
+      <div id="teacherTableList">
+        <table id="teacherTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">Full Name</th>
+              <th onclick="sortTable(1)">Position</th>
+              <th onclick="sortTable(2)">Years in Teaching</th>
+              <th onclick="sortTable(3)">IPCRF Rating</th>
+              <th onclick="sortTable(4)">School Year</th>
+              <th>Trainings Attended</th>
+              <th>Educational Attainment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+      <!-- Modal for viewing details -->
+      <div id="detailsModal" class="modal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;">
+        <div class="modal-content" style="background:#fff;padding:24px 32px;border-radius:10px;max-width:500px;width:90%;position:relative;">
+          <span id="closeModal" style="position:absolute;top:10px;right:18px;font-size:2rem;cursor:pointer;">&times;</span>
+          <div id="modalBody"></div>
+        </div>
+      </div>
+
+      <!-- Modal for editing teacher -->
+      <div id="editModal" class="modal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;">
+        <div class="modal-content" style="background:#fff;padding:24px 32px;border-radius:10px;max-width:800px;width:90%;max-height:90vh;overflow-y:auto;position:relative;">
+          <span id="closeEditModal" style="position:absolute;top:10px;right:18px;font-size:2rem;cursor:pointer;">&times;</span>
+          <h2>Edit Teacher</h2>
+          <form id="editTeacherForm">
+            <input type="hidden" id="editTeacherId" name="teacherId" />
+            
+            <label>Full Name:</label>
+            <input type="text" id="editFullName" name="fullName" required />
+
+            <label>Position:</label>
+            <select id="editPosition" name="position" required>
+              <option value="">-- Select Position --</option>
+              <option>Teacher I</option>
+              <option>Teacher II</option>
+              <option>Teacher III</option>
+              <option>Master Teacher I</option>
+              <option>Master Teacher II</option>
+              <option>Master Teacher III</option>
+              <option>Head Teacher I</option>
+              <option>Head Teacher II</option>
+              <option>Head Teacher III</option>
+              <option>Head Teacher IV</option>
+              <option>Head Teacher V</option>
+              <option>Head Teacher VI</option>
+              <option>Principal I</option>
+              <option>Principal II</option>
+              <option>Principal III</option>
+            </select>
+
+            <label>Years in Teaching:</label>
+            <input type="number" id="editYearsInTeaching" name="yearsInTeaching" min="0" required />
+
+            <label>IPCRF Rating:</label>
+            <input type="text" id="editIpcrfRating" name="ipcrfRating" required />
+            
+            <label>School Year:</label>
+            <select id="editSchoolYear" name="schoolYear" required>
+              <option value="2023-2024">2023-2024</option>
+              <option value="2024-2025">2024-2025</option>
+            </select>
+
+            <!-- Trainings Attended Section -->
+            <section class="entry-section">
+              <h3>Trainings Attended</h3>
+              <div id="editTrainingList"></div>
+              <button type="button" id="editAddTrainingBtn">Add Training</button>
+            </section>
+
+            <!-- Educational Attainment Section -->
+            <section class="entry-section">
+              <h3>Educational Attainment</h3>
+
+              <!-- Bachelor's -->
+              <div class="degree-section">
+                <h4>Bachelor's Degree</h4>
+                <div id="editBachelorList"></div>
+                <button type="button" class="editAddEducationBtn" data-type="bachelor">Add Bachelor's</button>
+              </div>
+
+              <!-- Master's -->
+              <div class="degree-section">
+                <h4>Master's Degree</h4>
+                <div id="editMasterList"></div>
+                <button type="button" class="editAddEducationBtn" data-type="master">Add Master's</button>
+              </div>
+
+              <!-- Doctoral -->
+              <div class="degree-section">
+                <h4>Doctoral Degree</h4>
+                <div id="editDoctoralList"></div>
+                <button type="button" class="editAddEducationBtn" data-type="doctoral">Add Doctoral</button>
+              </div>
+            </section>
+
+            <!-- Hidden fields to store structured JSON -->
+            <input type="hidden" name="trainingData" id="editTrainingData" />
+            <input type="hidden" name="educationData" id="editEducationData" />
+
+            <div class="form-buttons">
+              <button type="submit">Update Teacher</button>
+              <button type="button" onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</body>
+</html>

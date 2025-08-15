@@ -156,6 +156,11 @@ document.addEventListener("DOMContentLoaded", () => {
         bachelorList.innerHTML = "";
         masterList.innerHTML = "";
         doctoralList.innerHTML = "";
+        
+        // Redirect back to dashboard after successful registration
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
       } else {
         alert("⚠️ Error: " + json.message);
       }
