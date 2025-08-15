@@ -36,6 +36,7 @@ while ($row = $teachersResult->fetchArray(SQLITE3_ASSOC)) {
         'position' => $row['position'],
         'years_in_teaching' => $row['years_in_teaching'],
         'ipcrf_rating' => $row['ipcrf_rating'],
+        'school_year' => $row['school_year'],
         'trainings' => $trainings,
         'education' => $education
     ];

@@ -202,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${Array.isArray(teacher.education) ? teacher.education.map(e => e.degree).join(', ') : ''}</td>
         <td>
           <button class="view-details-btn" data-id="${teacher.id}">View Details</button>
+          <button class="edit-btn" data-id="${teacher.id}">Edit</button>
           <button class="delete-btn" data-id="${teacher.id}">Delete</button>
         </td>
       `;
@@ -262,13 +263,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    // Add event listeners for edit buttons
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const teacherId = this.getAttribute('data-id');
+        const teacher = teachersData.find(t => String(t.id) === String(teacherId));
+        if (!teacher) return;
+        
+        openEditModal(teacher);
+      });
+    });
+
     // Modal close logic
     const modal = document.getElementById('detailsModal');
     const closeModal = document.getElementById('closeModal');
+    const editModal = document.getElementById('editModal');
+    
     if (closeModal && modal) {
       closeModal.onclick = () => { modal.style.display = 'none'; };
       window.onclick = (event) => {
         if (event.target === modal) modal.style.display = 'none';
+        if (event.target === editModal) editModal.style.display = 'none';
       };
     }
   }
@@ -630,4 +645,187 @@ document.addEventListener('DOMContentLoaded', () => {
   // cell.textContent = teacher.trainings.map(t => t.name).join(", ");
   // Use:
   // cell.innerHTML = getTrainingLevels(teacher.trainings);
+
+  // Edit modal functionality
+  function openEditModal(teacher) {
+    // Populate basic form fields
+    document.getElementById('editTeacherId').value = teacher.id;
+    document.getElementById('editFullName').value = teacher.full_name;
+    document.getElementById('editPosition').value = teacher.position;
+    document.getElementById('editYearsInTeaching').value = teacher.years_in_teaching;
+    document.getElementById('editIpcrfRating').value = teacher.ipcrf_rating;
+    document.getElementById('editSchoolYear').value = teacher.school_year;
+
+    // Clear existing training and education entries
+    document.getElementById('editTrainingList').innerHTML = '';
+    document.getElementById('editBachelorList').innerHTML = '';
+    document.getElementById('editMasterList').innerHTML = '';
+    document.getElementById('editDoctoralList').innerHTML = '';
+
+    // Populate trainings
+    if (Array.isArray(teacher.trainings)) {
+      teacher.trainings.forEach(training => {
+        addEditTraining(training.title, training.date, training.level);
+      });
+    }
+
+    // Populate education
+    if (Array.isArray(teacher.education)) {
+      teacher.education.forEach(edu => {
+        addEditEducation(edu.degree.toLowerCase().includes('bachelor') ? 'bachelor' :
+                         edu.degree.toLowerCase().includes('master') ? 'master' : 'doctoral',
+                         edu.degree, edu.school, edu.major, edu.year_attended, edu.status, edu.details);
+      });
+    }
+
+    // Show the modal
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function addEditTraining(title = '', date = '', level = '') {
+    const trainingList = document.getElementById('editTrainingList');
+    const div = document.createElement('div');
+    div.classList.add('training-entry');
+
+    div.innerHTML = `
+      <input type="text" placeholder="Training Title" class="training-title" value="${title}" required>
+      <input type="date" class="training-date" value="${date}" required>
+      <select class="training-level" required>
+        <option value="">Select Level</option>
+        <option value="School-Based" ${level === 'School-Based' ? 'selected' : ''}>School-Based</option>
+        <option value="District" ${level === 'District' ? 'selected' : ''}>District</option>
+        <option value="Division" ${level === 'Division' ? 'selected' : ''}>Division</option>
+        <option value="Regional" ${level === 'Regional' ? 'selected' : ''}>Regional</option>
+        <option value="National" ${level === 'National' ? 'selected' : ''}>National</option>
+        <option value="International" ${level === 'International' ? 'selected' : ''}>International</option>
+      </select>
+      <button type="button" class="remove-btn">🗑️</button>
+    `;
+
+    div.querySelector('.remove-btn').addEventListener('click', () => {
+      div.remove();
+    });
+
+    trainingList.appendChild(div);
+  }
+
+  function addEditEducation(type, degree = '', school = '', major = '', year = '', status = '', details = '') {
+    const container = {
+      bachelor: document.getElementById('editBachelorList'),
+      master: document.getElementById('editMasterList'),
+      doctoral: document.getElementById('editDoctoralList')
+    }[type];
+
+    const div = document.createElement('div');
+    div.classList.add('education-entry');
+
+    const yearId = `edit-${type}-year-${Date.now()}`;
+
+    div.innerHTML = `
+      <input type="text" placeholder="Degree" class="degree" value="${degree}" required>
+      <input type="text" placeholder="School" class="school" value="${school}" required>
+      <input type="text" placeholder="Major" class="major" value="${major}" required>
+      <input type="text" placeholder="Year Attended" id="${yearId}" class="year" value="${year}" required>
+      <select class="status" required>
+        <option value="">Status</option>
+        <option value="Graduated" ${status === 'Graduated' ? 'selected' : ''}>Graduated</option>
+        <option value="Undergraduate" ${status === 'Undergraduate' ? 'selected' : ''}>Undergraduate</option>
+        <option value="With Units" ${status === 'With Units' ? 'selected' : ''}>With Units</option>
+      </select>
+      <input type="text" placeholder="Details (e.g., Thesis Title or Earned Units)" class="details" value="${details}">
+      <button type="button" class="remove-btn">🗑️</button>
+    `;
+
+    div.querySelector('.remove-btn').addEventListener('click', () => {
+      div.remove();
+    });
+
+    container.appendChild(div);
+
+    flatpickr(`#${yearId}`, {
+      dateFormat: "Y",
+      allowInput: true
+    });
+  }
+
+  // Event listeners for edit modal
+  document.getElementById('editAddTrainingBtn')?.addEventListener('click', () => {
+    addEditTraining();
+  });
+
+  document.querySelectorAll('.editAddEducationBtn')?.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.type;
+      if (type) addEditEducation(type);
+    });
+  });
+
+  // Close edit modal
+  document.getElementById('closeEditModal')?.addEventListener('click', () => {
+    document.getElementById('editModal').style.display = 'none';
+  });
+
+  // Edit form submission
+  document.getElementById('editTeacherForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    
+    // Basic teacher data
+    formData.append('teacherId', document.getElementById('editTeacherId').value);
+    formData.append('fullName', document.getElementById('editFullName').value);
+    formData.append('position', document.getElementById('editPosition').value);
+    formData.append('yearsInTeaching', document.getElementById('editYearsInTeaching').value);
+    formData.append('ipcrfRating', document.getElementById('editIpcrfRating').value);
+    formData.append('schoolYear', document.getElementById('editSchoolYear').value);
+
+    // Training data
+    const trainingEntries = document.getElementById('editTrainingList').querySelectorAll('.training-entry');
+    const trainingData = Array.from(trainingEntries).map(entry => ({
+      title: entry.querySelector('.training-title')?.value.trim(),
+      date: entry.querySelector('.training-date')?.value,
+      level: entry.querySelector('.training-level')?.value
+    })).filter(t => t.title && t.date && t.level);
+
+    // Education data
+    const getEducationFrom = (list) =>
+      Array.from(list.querySelectorAll('.education-entry')).map(entry => ({
+        degree: entry.querySelector('.degree')?.value.trim(),
+        school: entry.querySelector('.school')?.value.trim(),
+        major: entry.querySelector('.major')?.value.trim(),
+        year_attended: entry.querySelector('.year')?.value.trim(),
+        status: entry.querySelector('.status')?.value.trim(),
+        details: entry.querySelector('.details')?.value.trim()
+      })).filter(e => e.degree && e.school && e.major);
+
+    const educationData = [
+      ...getEducationFrom(document.getElementById('editBachelorList')),
+      ...getEducationFrom(document.getElementById('editMasterList')),
+      ...getEducationFrom(document.getElementById('editDoctoralList'))
+    ];
+
+    formData.append('trainingData', JSON.stringify(trainingData));
+    formData.append('educationData', JSON.stringify(educationData));
+
+    try {
+      const response = await fetch('update_teacher.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('Teacher updated successfully!');
+        document.getElementById('editModal').style.display = 'none';
+        
+        // Refresh the teacher data
+        window.location.reload();
+      } else {
+        alert('Error: ' + (result.message || 'Failed to update teacher'));
+      }
+    } catch (error) {
+      alert('Error updating teacher: ' + error.message);
+    }
+  });
 });

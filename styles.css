@@ -25,19 +25,24 @@
 #teacherTable tbody tr:hover {
   background: #f9f9f9;
 }
-.delete-btn, .view-details-btn {
+.delete-btn, .view-details-btn, .edit-btn {
   background: var(--accent-color);
   color: var(--dark);
   border: none;
   border-radius: 6px;
   padding: 7px 16px;
-  margin: 2px 0;
+  margin: 2px 4px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
+  font-size: 0.9em;
 }
 .delete-btn:hover {
   background: #e57373;
+  color: #fff;
+}
+.edit-btn:hover {
+  background: #4caf50;
   color: #fff;
 }
 .view-details-btn:hover {
