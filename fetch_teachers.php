@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 try {
     $db = new SQLite3('database.sqlite');
 
-    $teacherQuery = $db->query('SELECT id, full_name, position, years_in_teaching, ipcrf_rating, school_year FROM teachers');
+    $teacherQuery = $db->query('SELECT id, full_name, position, grade_level, department, years_in_teaching, ipcrf_rating, school_year FROM teachers');
 
     $teachers = [];
     while ($teacher = $teacherQuery->fetchArray(SQLITE3_ASSOC)) {

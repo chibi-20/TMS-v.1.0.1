@@ -20,6 +20,8 @@ function hasAtLeastOneEducation($educationData) {
 if (
     empty($_POST['fullName']) ||
     empty($_POST['position']) ||
+    empty($_POST['gradeLevel']) ||
+    empty($_POST['department']) ||
     empty($_POST['yearsInTeaching']) ||
     empty($_POST['ipcrfRating']) ||
     empty($_POST['schoolYear']) ||
@@ -32,6 +34,8 @@ if (
 
 $fullName = $_POST['fullName'];
 $position = $_POST['position'];
+$gradeLevel = $_POST['gradeLevel'];
+$department = $_POST['department'];
 $yearsInTeaching = $_POST['yearsInTeaching'];
 $ipcrfRating = $_POST['ipcrfRating'];
 $schoolYear = $_POST['schoolYear'];
@@ -52,12 +56,14 @@ if (count($trainingData) === 0 || !hasAtLeastOneEducation($educationData)) {
 }
 
 // Insert teacher
-$stmt = $db->prepare("INSERT INTO teachers (full_name, position, years_in_teaching, ipcrf_rating, school_year) VALUES (?, ?, ?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO teachers (full_name, position, grade_level, department, years_in_teaching, ipcrf_rating, school_year) VALUES (?, ?, ?, ?, ?, ?, ?)");
 $stmt->bindValue(1, $fullName);
 $stmt->bindValue(2, $position);
-$stmt->bindValue(3, $yearsInTeaching);
-$stmt->bindValue(4, $ipcrfRating);
-$stmt->bindValue(5, $schoolYear);
+$stmt->bindValue(3, $gradeLevel);
+$stmt->bindValue(4, $department);
+$stmt->bindValue(5, $yearsInTeaching);
+$stmt->bindValue(6, $ipcrfRating);
+$stmt->bindValue(7, $schoolYear);
 $result = $stmt->execute();
 
 if (!$result) {

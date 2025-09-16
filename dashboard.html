@@ -45,6 +45,17 @@
           <canvas id="ipcrfPieChart"></canvas>
         </div>
       </div>
+      
+      <!-- Department Cards Section -->
+      <h2>Department Overview</h2>
+      <div style="text-align: center; margin-bottom: 15px;">
+        <button onclick="resetAllCustomTotals()" style="background: #ff5722; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 0.9em;">
+          Reset All Custom Totals
+        </button>
+      </div>
+      <div class="department-cards-container" id="departmentCardsContainer">
+        <!-- Department cards will be populated dynamically -->
+      </div>
     </section>
 
     <section id="listTab" class="tab-content">
@@ -53,6 +64,14 @@
         <div class="summary-table-item">
           <h3>Position</h3>
           <div id="positionSummaryTable"></div>
+        </div>
+        <div class="summary-table-item">
+          <h3>Grade Level</h3>
+          <div id="gradeLevelSummaryTable"></div>
+        </div>
+        <div class="summary-table-item">
+          <h3>Department</h3>
+          <div id="departmentSummaryTable"></div>
         </div>
         <div class="summary-table-item">
           <h3>Years in Service</h3>
@@ -95,6 +114,14 @@
         <option value="">All Educational Attainment</option>
         <!-- Populated dynamically -->
       </select>
+      <select id="gradeLevelFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Grade Levels</option>
+        <!-- Populated dynamically -->
+      </select>
+      <select id="departmentFilter" style="margin: 10px 0; min-width: 180px;">
+        <option value="">All Departments</option>
+        <!-- Populated dynamically -->
+      </select>
       <div id="teacherList">
       <div id="teacherTableList">
         <table id="teacherTable">
@@ -102,9 +129,11 @@
             <tr>
               <th onclick="sortTable(0)">Full Name</th>
               <th onclick="sortTable(1)">Position</th>
-              <th onclick="sortTable(2)">Years in Teaching</th>
-              <th onclick="sortTable(3)">IPCRF Rating</th>
-              <th onclick="sortTable(4)">School Year</th>
+              <th onclick="sortTable(2)">Grade Level</th>
+              <th onclick="sortTable(3)">Department</th>
+              <th onclick="sortTable(4)">Years in Teaching</th>
+              <th onclick="sortTable(5)">IPCRF Rating</th>
+              <th onclick="sortTable(6)">School Year</th>
               <th>Trainings Attended</th>
               <th>Educational Attainment</th>
               <th>Action</th>
@@ -152,6 +181,28 @@
               <option>Principal I</option>
               <option>Principal II</option>
               <option>Principal III</option>
+            </select>
+
+            <label>Grade Level:</label>
+            <select id="editGradeLevel" name="gradeLevel" required>
+              <option value="">-- Select Grade Level --</option>
+              <option value="Grade 7">Grade 7</option>
+              <option value="Grade 8">Grade 8</option>
+              <option value="Grade 9">Grade 9</option>
+              <option value="Grade 10">Grade 10</option>
+            </select>
+
+            <label>Department:</label>
+            <select id="editDepartment" name="department" required>
+              <option value="">-- Select Department --</option>
+              <option value="Filipino">Filipino</option>
+              <option value="English">English</option>
+              <option value="Math">Math</option>
+              <option value="Science">Science</option>
+              <option value="Araling Panlipunan">Araling Panlipunan</option>
+              <option value="Edukasyon sa Pagpapakatao">Edukasyon sa Pagpapakatao</option>
+              <option value="Technology and Livelihood Education">Technology and Livelihood Education</option>
+              <option value="MAPEH">MAPEH</option>
             </select>
 
             <label>Years in Teaching:</label>

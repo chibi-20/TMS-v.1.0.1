@@ -1,3 +1,6 @@
+// Global variables and functions for department cards
+window.TMS = window.TMS || {};
+
 document.addEventListener('DOMContentLoaded', () => {
   const teacherList = document.getElementById('teacherList');
   const addBtn = document.getElementById('addTeacherBtn');
@@ -13,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const yearsFilter = document.getElementById('yearsFilter');
   const trainingsFilter = document.getElementById('trainingsFilter');
   const educationFilter = document.getElementById('educationFilter');
+  const gradeLevelFilter = document.getElementById('gradeLevelFilter');
+  const departmentFilter = document.getElementById('departmentFilter');
 
   // Fix: Add Teacher button working
   if (addBtn) {
@@ -36,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render charts when graph tab is active
         if (teachersData && teachersData.length > 0) {
           renderCharts(teachersData);
+          renderDepartmentCards(teachersData);
         }
       } else {
         // Destroy charts when not on graph tab
@@ -81,6 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       teachersData = teachers; // Save globally
+      window.TMS.teachersData = teachers; // Make globally accessible
+      window.TMS.schoolYearSelect = schoolYearSelect;
+      window.TMS.teacherSearch = teacherSearch;
+      window.TMS.positionFilter = positionFilter;
+      window.TMS.yearsFilter = yearsFilter;
+      window.TMS.trainingsFilter = trainingsFilter;
+      window.TMS.educationFilter = educationFilter;
+      window.TMS.gradeLevelFilter = gradeLevelFilter;
+      window.TMS.departmentFilter = departmentFilter;
 
 
       // Populate position filter dropdown
@@ -110,6 +125,20 @@ document.addEventListener('DOMContentLoaded', () => {
           ['Bachelor', 'Masteral', 'Doctoral'].map(e => `<option value="${e}">${e}</option>`).join('');
       }
 
+      // Populate grade level filter
+      if (gradeLevelFilter) {
+        const uniqueGradeLevels = Array.from(new Set(teachersData.map(t => t.grade_level).filter(gl => gl))).sort();
+        gradeLevelFilter.innerHTML = '<option value="">All Grade Levels</option>' +
+          uniqueGradeLevels.map(gl => `<option value="${gl}">${gl}</option>`).join('');
+      }
+
+      // Populate department filter
+      if (departmentFilter) {
+        const uniqueDepartments = Array.from(new Set(teachersData.map(t => t.department).filter(d => d))).sort();
+        departmentFilter.innerHTML = '<option value="">All Departments</option>' +
+          uniqueDepartments.map(dept => `<option value="${dept}">${dept}</option>`).join('');
+      }
+
   // renderTeachers(sortTeachers(teachersData, sortSelect.value));
   renderTeacherTable(teachersData); // Initial render for table
   
@@ -117,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const activeTab = document.querySelector('.tab.active');
   if (activeTab && activeTab.dataset.tab === 'graphTab') {
     renderCharts(teachersData); // Initial render for charts
+    renderDepartmentCards(teachersData); // Initial render for department cards
   }
   
   renderSummaryTables(teachersData);
@@ -195,6 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td>${teacher.full_name}</td>
         <td>${teacher.position}</td>
+        <td>${teacher.grade_level || ''}</td>
+        <td>${teacher.department || ''}</td>
         <td>${teacher.years_in_teaching}</td>
         <td>${teacher.ipcrf_rating}</td>
         <td>${teacher.school_year}</td>
@@ -296,9 +328,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedYears = yearsFilter ? yearsFilter.value : '';
     const selectedTraining = trainingsFilter ? trainingsFilter.value : '';
     const selectedEducation = educationFilter ? educationFilter.value : '';
+    const selectedGradeLevel = gradeLevelFilter ? gradeLevelFilter.value : '';
+    const selectedDepartment = departmentFilter ? departmentFilter.value : '';
     let filtered = teachersData.filter(t => t.school_year === selectedYear);
     if (selectedPosition) {
       filtered = filtered.filter(t => t.position === selectedPosition);
+    }
+    if (selectedGradeLevel) {
+      filtered = filtered.filter(t => t.grade_level === selectedGradeLevel);
+    }
+    if (selectedDepartment) {
+      filtered = filtered.filter(t => t.department === selectedDepartment);
     }
     if (selectedYears) {
       filtered = filtered.filter(t => {
@@ -343,6 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return filtered;
   }
 
+  // Make getFilteredTeachers globally accessible
+  window.TMS.getFilteredTeachers = getFilteredTeachers;
+
   // Filter and render on school year change
 
   // Unified filter update for year, search, and position
@@ -351,6 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTeacherTable(filtered);
   // renderTeachers(sortTeachers(filtered, sortSelect.value));
   renderCharts(filtered);
+  renderDepartmentCards(filtered);
   renderSummaryTables(filtered);
   }
 
@@ -360,6 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (yearsFilter) yearsFilter.addEventListener('change', updateTeacherFilters);
   if (trainingsFilter) trainingsFilter.addEventListener('change', updateTeacherFilters);
   if (educationFilter) educationFilter.addEventListener('change', updateTeacherFilters);
+  if (gradeLevelFilter) gradeLevelFilter.addEventListener('change', updateTeacherFilters);
+  if (departmentFilter) departmentFilter.addEventListener('change', updateTeacherFilters);
 
   function sortTeachers(teachers, criteria) {
     return teachers.slice().sort((a, b) => {
@@ -533,6 +579,83 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function renderDepartmentCards(teachers) {
+    // Get all teachers data for total counts
+    const allTeachersData = teachersData; // Global variable with all teachers
+    const currentFilteredTeachers = teachers; // Teachers currently displayed/filtered
+    
+    // Load custom totals from localStorage
+    const customTotals = JSON.parse(localStorage.getItem('departmentCustomTotals') || '{}');
+    
+    // Calculate department counts
+    const allDepartmentCounts = {};
+    const currentDepartmentCounts = {};
+    
+    // Count all teachers by department
+    allTeachersData.forEach(t => {
+      if (t.department) {
+        allDepartmentCounts[t.department] = (allDepartmentCounts[t.department] || 0) + 1;
+      }
+    });
+    
+    // Count currently filtered/displayed teachers by department
+    currentFilteredTeachers.forEach(t => {
+      if (t.department) {
+        currentDepartmentCounts[t.department] = (currentDepartmentCounts[t.department] || 0) + 1;
+      }
+    });
+    
+    // Get all unique departments (include departments with custom totals even if no teachers)
+    const allDepartments = [...new Set([
+      ...Object.keys(allDepartmentCounts),
+      ...Object.keys(customTotals)
+    ])].sort();
+    
+    const container = document.getElementById('departmentCardsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    allDepartments.forEach(department => {
+      // Use custom total if set, otherwise use actual count
+      const totalCount = customTotals[department] !== undefined ? customTotals[department] : (allDepartmentCounts[department] || 0);
+      const currentCount = currentDepartmentCounts[department] || 0;
+      const completionRate = totalCount > 0 ? Math.round((currentCount / totalCount) * 100) : 0;
+      
+      // Generate CSS class name from department name
+      const cssClass = department.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      
+      const card = document.createElement('div');
+      card.className = `department-card ${cssClass}`;
+      
+      card.innerHTML = `
+        <h3>${department}</h3>
+        <div class="department-stats">
+          <div class="stat-row editable" data-department="${department}">
+            <span class="stat-label">Total Teachers:</span>
+            <span class="stat-value">${totalCount}</span>
+            <button class="edit-total-btn" onclick="editTotalTeachers('${department}', ${totalCount})">✏️</button>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Currently Shown:</span>
+            <span class="stat-value">${currentCount}</span>
+          </div>
+          <div class="completion-rate">
+            <div class="stat-label">Representation</div>
+            <div class="completion-percentage">${completionRate}%</div>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(card);
+    });
+  }
+
+  // Make renderDepartmentCards globally accessible
+  window.TMS.renderDepartmentCards = renderDepartmentCards;
+
   function renderSummaryTables(teachers) {
     // --- 1. Number of teachers per position ---
     const positionCounts = {};
@@ -547,7 +670,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const posDiv = document.getElementById('positionSummaryTable');
     if (posDiv) posDiv.innerHTML = posTable;
 
-    // --- 2. Table: Position and Years of Service ---
+    // --- 2. Number of teachers per grade level ---
+    const gradeLevelCounts = {};
+    teachers.forEach(t => {
+      const gradeLevel = t.grade_level || 'Not Specified';
+      gradeLevelCounts[gradeLevel] = (gradeLevelCounts[gradeLevel] || 0) + 1;
+    });
+    let gradeLevelTable = `<table class="summary-table"><thead><tr><th>Grade Level</th><th>Number of Teachers</th></tr></thead><tbody>`;
+    Object.entries(gradeLevelCounts).forEach(([grade, count]) => {
+      gradeLevelTable += `<tr><td>${grade}</td><td>${count}</td></tr>`;
+    });
+    gradeLevelTable += `</tbody></table>`;
+    const gradeLevelDiv = document.getElementById('gradeLevelSummaryTable');
+    if (gradeLevelDiv) gradeLevelDiv.innerHTML = gradeLevelTable;
+
+    // --- 3. Number of teachers per department ---
+    const departmentCounts = {};
+    teachers.forEach(t => {
+      const department = t.department || 'Not Specified';
+      departmentCounts[department] = (departmentCounts[department] || 0) + 1;
+    });
+    let departmentTable = `<table class="summary-table"><thead><tr><th>Department</th><th>Number of Teachers</th></tr></thead><tbody>`;
+    Object.entries(departmentCounts).forEach(([dept, count]) => {
+      departmentTable += `<tr><td>${dept}</td><td>${count}</td></tr>`;
+    });
+    departmentTable += `</tbody></table>`;
+    const departmentDiv = document.getElementById('departmentSummaryTable');
+    if (departmentDiv) departmentDiv.innerHTML = departmentTable;
+
+    // --- 4. Table: Position and Years of Service ---
     // Group by position, then by years_in_teaching range
     const yearRanges = ['0-5', '6-10', '11-15', '16-20', '21+'];
     const posYearCounts = {};
@@ -573,7 +724,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const posYearDiv = document.getElementById('positionYearsTable');
     if (posYearDiv) posYearDiv.innerHTML = posYearTable;
 
-    // --- 3. Table: Seminar/Training Attendance by Level ---
+    // --- 5. Table: Seminar/Training Attendance by Level ---
     const seminarLevels = ['School-Based', 'Division', 'Region', 'National', 'International'];
     const seminarCounts = { 'School-Based': 0, 'Division': 0, 'Region': 0, 'National': 0, 'International': 0 };
     teachers.forEach(t => {
@@ -591,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const seminarDiv = document.getElementById('seminarSummaryTable');
     if (seminarDiv) seminarDiv.innerHTML = seminarTable;
 
-    // --- 4. Table: Degree Summary (Bachelor's only, Masteral, Doctoral) ---
+    // --- 6. Table: Degree Summary (Bachelor's only, Masteral, Doctoral) ---
     let bachelorsOnly = 0, masteral = 0, doctoral = 0;
     teachers.forEach(t => {
       if (Array.isArray(t.education)) {
@@ -652,6 +803,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('editTeacherId').value = teacher.id;
     document.getElementById('editFullName').value = teacher.full_name;
     document.getElementById('editPosition').value = teacher.position;
+    document.getElementById('editGradeLevel').value = teacher.grade_level || '';
+    document.getElementById('editDepartment').value = teacher.department || '';
     document.getElementById('editYearsInTeaching').value = teacher.years_in_teaching;
     document.getElementById('editIpcrfRating').value = teacher.ipcrf_rating;
     document.getElementById('editSchoolYear').value = teacher.school_year;
@@ -775,6 +928,8 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('teacherId', document.getElementById('editTeacherId').value);
     formData.append('fullName', document.getElementById('editFullName').value);
     formData.append('position', document.getElementById('editPosition').value);
+    formData.append('gradeLevel', document.getElementById('editGradeLevel').value);
+    formData.append('department', document.getElementById('editDepartment').value);
     formData.append('yearsInTeaching', document.getElementById('editYearsInTeaching').value);
     formData.append('ipcrfRating', document.getElementById('editIpcrfRating').value);
     formData.append('schoolYear', document.getElementById('editSchoolYear').value);
@@ -829,3 +984,105 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Global functions for department total editing
+function editTotalTeachers(department, currentTotal) {
+  const statRow = document.querySelector(`.stat-row[data-department="${department}"]`);
+  if (!statRow || statRow.classList.contains('editing')) return;
+  
+  statRow.classList.add('editing');
+  
+  const statValue = statRow.querySelector('.stat-value');
+  const editBtn = statRow.querySelector('.edit-total-btn');
+  
+  // Hide the current value and edit button
+  statValue.style.display = 'none';
+  editBtn.style.display = 'none';
+  
+  // Create input and controls
+  const inputContainer = document.createElement('div');
+  inputContainer.className = 'edit-total-controls';
+  inputContainer.innerHTML = `
+    <input type="number" class="edit-total-input" value="${currentTotal}" min="0" max="999">
+    <button class="save-total-btn" onclick="saveTotalTeachers('${department}')">✓</button>
+    <button class="cancel-total-btn" onclick="cancelEditTotal('${department}')">✕</button>
+  `;
+  
+  statRow.appendChild(inputContainer);
+  
+  // Focus the input
+  const input = inputContainer.querySelector('.edit-total-input');
+  input.focus();
+  input.select();
+  
+  // Handle Enter key
+  input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      saveTotalTeachers(department);
+    } else if (e.key === 'Escape') {
+      cancelEditTotal(department);
+    }
+  });
+}
+
+function saveTotalTeachers(department) {
+  const statRow = document.querySelector(`.stat-row[data-department="${department}"]`);
+  if (!statRow) return;
+  
+  const input = statRow.querySelector('.edit-total-input');
+  const newTotal = parseInt(input.value) || 0;
+  
+  // Save to localStorage
+  const customTotals = JSON.parse(localStorage.getItem('departmentCustomTotals') || '{}');
+  customTotals[department] = newTotal;
+  localStorage.setItem('departmentCustomTotals', JSON.stringify(customTotals));
+  
+  // Refresh the cards to show new calculation
+  if (window.TMS && window.TMS.getFilteredTeachers) {
+    const filtered = window.TMS.getFilteredTeachers();
+    // Find and call renderDepartmentCards if available
+    if (window.TMS.renderDepartmentCards) {
+      window.TMS.renderDepartmentCards(filtered);
+    } else {
+      // Fallback: refresh the page if functions not available
+      location.reload();
+    }
+  } else {
+    // Fallback: refresh the page
+    location.reload();
+  }
+}
+
+function cancelEditTotal(department) {
+  const statRow = document.querySelector(`.stat-row[data-department="${department}"]`);
+  if (!statRow) return;
+  
+  statRow.classList.remove('editing');
+  
+  // Remove input controls
+  const inputContainer = statRow.querySelector('.edit-total-controls');
+  if (inputContainer) {
+    inputContainer.remove();
+  }
+  
+  // Show original elements
+  const statValue = statRow.querySelector('.stat-value');
+  const editBtn = statRow.querySelector('.edit-total-btn');
+  statValue.style.display = 'inline';
+  editBtn.style.display = 'inline';
+}
+
+// Function to reset all custom totals
+function resetAllCustomTotals() {
+  if (confirm('Are you sure you want to reset all custom totals to their original values?')) {
+    localStorage.removeItem('departmentCustomTotals');
+    
+    if (window.TMS && window.TMS.getFilteredTeachers && window.TMS.renderDepartmentCards) {
+      const filtered = window.TMS.getFilteredTeachers();
+      window.TMS.renderDepartmentCards(filtered);
+    } else {
+      // Fallback: refresh the page
+      location.reload();
+    }
+  }
+}

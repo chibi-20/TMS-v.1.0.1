@@ -21,6 +21,8 @@ try {
     $teacherId = $_POST['teacherId'] ?? '';
     $fullName = $_POST['fullName'] ?? '';
     $position = $_POST['position'] ?? '';
+    $gradeLevel = $_POST['gradeLevel'] ?? '';
+    $department = $_POST['department'] ?? '';
     $yearsInTeaching = $_POST['yearsInTeaching'] ?? '';
     $ipcrfRating = $_POST['ipcrfRating'] ?? '';
     $schoolYear = $_POST['schoolYear'] ?? '';
@@ -28,7 +30,7 @@ try {
     $educationData = $_POST['educationData'] ?? '';
 
     // Validate required fields
-    if (empty($teacherId) || empty($fullName) || empty($position) || empty($yearsInTeaching) || empty($ipcrfRating) || empty($schoolYear)) {
+    if (empty($teacherId) || empty($fullName) || empty($position) || empty($gradeLevel) || empty($department) || empty($yearsInTeaching) || empty($ipcrfRating) || empty($schoolYear)) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);
         exit;
     }
@@ -37,13 +39,15 @@ try {
     $db->exec('BEGIN');
 
     // Update teacher record
-    $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
+    $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, grade_level = ?, department = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
     $stmt->bindValue(1, $fullName, SQLITE3_TEXT);
     $stmt->bindValue(2, $position, SQLITE3_TEXT);
-    $stmt->bindValue(3, $yearsInTeaching, SQLITE3_INTEGER);
-    $stmt->bindValue(4, $ipcrfRating, SQLITE3_TEXT);
-    $stmt->bindValue(5, $schoolYear, SQLITE3_TEXT);
-    $stmt->bindValue(6, $teacherId, SQLITE3_INTEGER);
+    $stmt->bindValue(3, $gradeLevel, SQLITE3_TEXT);
+    $stmt->bindValue(4, $department, SQLITE3_TEXT);
+    $stmt->bindValue(5, $yearsInTeaching, SQLITE3_INTEGER);
+    $stmt->bindValue(6, $ipcrfRating, SQLITE3_TEXT);
+    $stmt->bindValue(7, $schoolYear, SQLITE3_TEXT);
+    $stmt->bindValue(8, $teacherId, SQLITE3_INTEGER);
     
     if (!$stmt->execute()) {
         throw new Exception('Failed to update teacher record');
