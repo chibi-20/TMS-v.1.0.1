@@ -14,8 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Include database configuration
+require_once 'config.php';
+
 try {
-    $db = new SQLite3('database.sqlite');
+    $db = getDBConnection();
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+    exit;
+}
     
     // Get form data
     $teacherId = $_POST['teacherId'] ?? '';
@@ -36,39 +43,42 @@ try {
     }
 
     // Begin transaction
-    $db->exec('BEGIN');
+    $db->beginTransaction();
 
     // Update teacher record
     $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, grade_level = ?, department = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
-    $stmt->bindValue(1, $fullName, SQLITE3_TEXT);
-    $stmt->bindValue(2, $position, SQLITE3_TEXT);
-    $stmt->bindValue(3, $gradeLevel, SQLITE3_TEXT);
-    $stmt->bindValue(4, $department, SQLITE3_TEXT);
-    $stmt->bindValue(5, $yearsInTeaching, SQLITE3_INTEGER);
-    $stmt->bindValue(6, $ipcrfRating, SQLITE3_TEXT);
-    $stmt->bindValue(7, $schoolYear, SQLITE3_TEXT);
-    $stmt->bindValue(8, $teacherId, SQLITE3_INTEGER);
+    $result = $stmt->execute([
+        $fullName,
+        $position,
+        $gradeLevel,
+        $department,
+        $yearsInTeaching,
+        $ipcrfRating,
+        $schoolYear,
+        $teacherId
+    ]);
     
-    if (!$stmt->execute()) {
+    if (!$result) {
         throw new Exception('Failed to update teacher record');
     }
 
     // Delete existing trainings and education records
-    $db->exec("DELETE FROM trainings WHERE teacher_id = $teacherId");
-    $db->exec("DELETE FROM education WHERE teacher_id = $teacherId");
+    $db->prepare("DELETE FROM trainings WHERE teacher_id = ?")->execute([$teacherId]);
+    $db->prepare("DELETE FROM education WHERE teacher_id = ?")->execute([$teacherId]);
 
     // Insert training data
     if (!empty($trainingData)) {
         $trainings = json_decode($trainingData, true);
         if (is_array($trainings)) {
+            $stmt = $db->prepare('INSERT INTO trainings (teacher_id, title, date, level) VALUES (?, ?, ?, ?)');
             foreach ($trainings as $training) {
                 if (!empty($training['title']) && !empty($training['date']) && !empty($training['level'])) {
-                    $stmt = $db->prepare('INSERT INTO trainings (teacher_id, title, date, level) VALUES (?, ?, ?, ?)');
-                    $stmt->bindValue(1, $teacherId, SQLITE3_INTEGER);
-                    $stmt->bindValue(2, $training['title'], SQLITE3_TEXT);
-                    $stmt->bindValue(3, $training['date'], SQLITE3_TEXT);
-                    $stmt->bindValue(4, $training['level'], SQLITE3_TEXT);
-                    $stmt->execute();
+                    $stmt->execute([
+                        $teacherId,
+                        $training['title'],
+                        $training['date'],
+                        $training['level']
+                    ]);
                 }
             }
         }
@@ -78,31 +88,41 @@ try {
     if (!empty($educationData)) {
         $educations = json_decode($educationData, true);
         if (is_array($educations)) {
+            $stmt = $db->prepare('INSERT INTO education (teacher_id, type, degree, school, major, year_attended, status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             foreach ($educations as $education) {
                 if (!empty($education['degree']) && !empty($education['school']) && !empty($education['major'])) {
-                    $stmt = $db->prepare('INSERT INTO education (teacher_id, degree, school, major, year_attended, status, details) VALUES (?, ?, ?, ?, ?, ?, ?)');
-                    $stmt->bindValue(1, $teacherId, SQLITE3_INTEGER);
-                    $stmt->bindValue(2, $education['degree'], SQLITE3_TEXT);
-                    $stmt->bindValue(3, $education['school'], SQLITE3_TEXT);
-                    $stmt->bindValue(4, $education['major'], SQLITE3_TEXT);
-                    $stmt->bindValue(5, $education['year_attended'] ?? '', SQLITE3_TEXT);
-                    $stmt->bindValue(6, $education['status'] ?? '', SQLITE3_TEXT);
-                    $stmt->bindValue(7, $education['details'] ?? '', SQLITE3_TEXT);
-                    $stmt->execute();
+                    // Determine education type based on degree
+                    $type = 'bachelor';
+                    if (stripos($education['degree'], 'master') !== false || stripos($education['degree'], 'ma ') !== false) {
+                        $type = 'master';
+                    } elseif (stripos($education['degree'], 'doctor') !== false || stripos($education['degree'], 'phd') !== false) {
+                        $type = 'doctoral';
+                    }
+                    
+                    $stmt->execute([
+                        $teacherId,
+                        $type,
+                        $education['degree'],
+                        $education['school'],
+                        $education['major'],
+                        $education['year_attended'] ?? '',
+                        $education['status'] ?? '',
+                        $education['details'] ?? ''
+                    ]);
                 }
             }
         }
     }
 
     // Commit transaction
-    $db->exec('COMMIT');
+    $db->commit();
     
     echo json_encode(['success' => true, 'message' => 'Teacher updated successfully']);
 
 } catch (Exception $e) {
     // Rollback transaction on error
     if (isset($db)) {
-        $db->exec('ROLLBACK');
+        $db->rollback();
     }
     
     error_log("Update teacher error: " . $e->getMessage());

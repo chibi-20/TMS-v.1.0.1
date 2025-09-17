@@ -3,7 +3,17 @@ header('Content-Type: application/json');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$db = new SQLite3('database.sqlite');
+// Include database configuration
+require_once 'config.php';
+
+try {
+    $db = getDBConnection();
+    // Initialize database tables if they don't exist
+    initializeDatabase();
+} catch (PDOException $e) {
+    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+    exit;
+}
 
 // Log the raw POST data
 file_put_contents("debug_log.txt", print_r($_POST, true));
@@ -57,30 +67,32 @@ if (count($trainingData) === 0 || !hasAtLeastOneEducation($educationData)) {
 
 // Insert teacher
 $stmt = $db->prepare("INSERT INTO teachers (full_name, position, grade_level, department, years_in_teaching, ipcrf_rating, school_year) VALUES (?, ?, ?, ?, ?, ?, ?)");
-$stmt->bindValue(1, $fullName);
-$stmt->bindValue(2, $position);
-$stmt->bindValue(3, $gradeLevel);
-$stmt->bindValue(4, $department);
-$stmt->bindValue(5, $yearsInTeaching);
-$stmt->bindValue(6, $ipcrfRating);
-$stmt->bindValue(7, $schoolYear);
-$result = $stmt->execute();
+$result = $stmt->execute([
+    $fullName,
+    $position,
+    $gradeLevel,
+    $department,
+    $yearsInTeaching,
+    $ipcrfRating,
+    $schoolYear
+]);
 
 if (!$result) {
     echo json_encode(["success" => false, "message" => "Failed to insert teacher info."]);
     exit;
 }
 
-$teacherId = $db->lastInsertRowID();
+$teacherId = $db->lastInsertId();
 
 // Insert trainings
 foreach ($trainingData as $training) {
     $stmt = $db->prepare("INSERT INTO trainings (teacher_id, title, date, level) VALUES (?, ?, ?, ?)");
-    $stmt->bindValue(1, $teacherId);
-    $stmt->bindValue(2, $training['title']);
-    $stmt->bindValue(3, $training['date']);
-    $stmt->bindValue(4, $training['level']);
-    $stmt->execute();
+    $stmt->execute([
+        $teacherId,
+        $training['title'],
+        $training['date'],
+        $training['level']
+    ]);
 }
 
 // Insert education
@@ -91,15 +103,16 @@ foreach (['bachelor', 'master', 'doctoral'] as $type) {
         $stmt = $db->prepare("INSERT INTO education (
             teacher_id, type, degree, school, major, year_attended, status, details
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bindValue(1, $teacherId);
-        $stmt->bindValue(2, $type);
-        $stmt->bindValue(3, $entry['degree']);
-        $stmt->bindValue(4, $entry['school']);
-        $stmt->bindValue(5, $entry['major']);
-        $stmt->bindValue(6, $entry['year']);
-        $stmt->bindValue(7, $entry['status']);
-        $stmt->bindValue(8, $entry['details']);
-        $stmt->execute();
+        $stmt->execute([
+            $teacherId,
+            $type,
+            $entry['degree'],
+            $entry['school'],
+            $entry['major'],
+            $entry['year'],
+            $entry['status'],
+            $entry['details']
+        ]);
     }
 }
 

@@ -1,18 +1,18 @@
 <?php
-// Simple SQLite Database Viewer
-$dbFile = 'database.sqlite';
+// MySQL Database Viewer for TMS
+require_once 'config.php';
 
-if (!file_exists($dbFile)) {
-    die("<h2>Database file not found!</h2><p>Expected: $dbFile</p>");
+try {
+    $db = getDBConnection();
+} catch (PDOException $e) {
+    die("<h2>Database connection failed!</h2><p>Error: " . $e->getMessage() . "</p>");
 }
-
-$db = new SQLite3($dbFile);
 
 // Get all tables
 $tables = [];
-$result = $db->query("SELECT name FROM sqlite_master WHERE type='table'");
-while ($row = $result->fetchArray()) {
-    $tables[] = $row['name'];
+$result = $db->query("SHOW TABLES");
+while ($row = $result->fetch(PDO::FETCH_NUM)) {
+    $tables[] = $row[0];
 }
 
 $selectedTable = $_GET['table'] ?? '';
@@ -33,8 +33,8 @@ $selectedTable = $_GET['table'] ?? '';
     </style>
 </head>
 <body>
-    <h1>TMS Database Viewer</h1>
-    <p><strong>Database:</strong> <?= $dbFile ?></p>
+    <h1>TMS MySQL Database Viewer</h1>
+    <p><strong>Database:</strong> <?= DB_NAME ?> on <?= DB_HOST ?></p>
     
     <div class="nav">
         <a href="db_viewer.php">All Tables</a>
@@ -51,17 +51,18 @@ $selectedTable = $_GET['table'] ?? '';
         <?php foreach ($tables as $table): ?>
             <h3><?= ucfirst($table) ?> Table</h3>
             <table>
-                <tr><th>Column</th><th>Type</th><th>Not Null</th><th>Default</th><th>Primary Key</th></tr>
+                <tr><th>Column</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th></tr>
                 <?php
-                $result = $db->query("PRAGMA table_info($table)");
-                while ($row = $result->fetchArray()):
+                $result = $db->query("DESCRIBE $table");
+                while ($row = $result->fetch(PDO::FETCH_ASSOC)):
                 ?>
                 <tr>
-                    <td><?= $row['name'] ?></td>
-                    <td><?= $row['type'] ?></td>
-                    <td><?= $row['notnull'] ? 'Yes' : 'No' ?></td>
-                    <td><?= $row['dflt_value'] ?? 'NULL' ?></td>
-                    <td><?= $row['pk'] ? 'Yes' : 'No' ?></td>
+                    <td><?= $row['Field'] ?></td>
+                    <td><?= $row['Type'] ?></td>
+                    <td><?= $row['Null'] ?></td>
+                    <td><?= $row['Key'] ?></td>
+                    <td><?= $row['Default'] ?? 'NULL' ?></td>
+                    <td><?= $row['Extra'] ?></td>
                 </tr>
                 <?php endwhile; ?>
             </table>
@@ -71,18 +72,22 @@ $selectedTable = $_GET['table'] ?? '';
         <h2><?= ucfirst($selectedTable) ?> Data</h2>
         <?php
         $result = $db->query("SELECT * FROM $selectedTable");
-        if ($result):
-            $firstRow = $result->fetchArray(SQLITE3_ASSOC);
-            if ($firstRow):
-                $result->reset();
+        if ($result && $result->rowCount() > 0):
+            $columns = [];
+            if ($result->rowCount() > 0) {
+                // Get column names
+                for ($i = 0; $i < $result->columnCount(); $i++) {
+                    $columns[] = $result->getColumnMeta($i)['name'];
+                }
+            }
         ?>
         <table>
             <tr>
-                <?php foreach (array_keys($firstRow) as $column): ?>
+                <?php foreach ($columns as $column): ?>
                     <th><?= $column ?></th>
                 <?php endforeach; ?>
             </tr>
-            <?php while ($row = $result->fetchArray(SQLITE3_ASSOC)): ?>
+            <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
             <tr>
                 <?php foreach ($row as $value): ?>
                     <td><?= htmlspecialchars($value ?? 'NULL') ?></td>
@@ -93,11 +98,9 @@ $selectedTable = $_GET['table'] ?? '';
         <?php else: ?>
             <p>No data found in <?= $selectedTable ?> table.</p>
         <?php endif; ?>
-        <?php endif; ?>
     <?php endif; ?>
 
     <hr>
-    <p><small>Database file size: <?= number_format(filesize($dbFile)) ?> bytes</small></p>
+    <p><small>Connected to MySQL database: <?= DB_NAME ?></small></p>
 </body>
 </html>
-<?php $db->close(); ?>

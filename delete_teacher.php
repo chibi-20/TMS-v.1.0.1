@@ -1,6 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
+// Include database configuration
+require_once 'config.php';
+
 // Get the raw POST data
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -12,16 +15,23 @@ if (!isset($data['id'])) {
 $id = intval($data['id']);
 
 try {
-    $db = new SQLite3('database.sqlite');
-    // Delete from trainings and education first (if you want to keep referential integrity)
-    $db->exec('DELETE FROM trainings WHERE teacher_id = ' . $id);
-    $db->exec('DELETE FROM education WHERE teacher_id = ' . $id);
+    $db = getDBConnection();
+    
+    // Delete from trainings and education first (CASCADE should handle this, but being explicit)
+    $stmt = $db->prepare('DELETE FROM trainings WHERE teacher_id = ?');
+    $stmt->execute([$id]);
+    
+    $stmt = $db->prepare('DELETE FROM education WHERE teacher_id = ?');
+    $stmt->execute([$id]);
+    
     // Delete from teachers
-    $result = $db->exec('DELETE FROM teachers WHERE id = ' . $id);
-    if ($result) {
+    $stmt = $db->prepare('DELETE FROM teachers WHERE id = ?');
+    $result = $stmt->execute([$id]);
+    
+    if ($result && $stmt->rowCount() > 0) {
         echo json_encode(['success' => true]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Delete failed.']);
+        echo json_encode(['success' => false, 'message' => 'Teacher not found or delete failed.']);
     }
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);

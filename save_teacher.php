@@ -1,42 +1,17 @@
 <?php
-// Connect to SQLite database
-$db = new PDO('sqlite:database.db');
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// Include database configuration
+require_once 'config.php';
 
-// Create tables if they don't exist
-$db->exec("
-  CREATE TABLE IF NOT EXISTS teachers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name TEXT,
-    position TEXT,
-    years_in_teaching INTEGER,
-    ipcrf_rating REAL
-  );
-
-  CREATE TABLE IF NOT EXISTS trainings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    teacher_id INTEGER,
-    title TEXT,
-    date TEXT,
-    venue TEXT,
-    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS education (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    teacher_id INTEGER,
-    level TEXT,
-    degree TEXT,
-    major TEXT,
-    school TEXT,
-    status TEXT,
-    title_or_units TEXT,
-    from_year TEXT,
-    to_year TEXT,
-    honors TEXT,
-    FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
-  );
-");
+// Connect to MySQL database
+try {
+    $db = getDBConnection();
+    // Initialize database tables if they don't exist
+    initializeDatabase();
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(["message" => "Database connection failed"]);
+    exit;
+}
 
 // Read JSON input from frontend
 $data = json_decode(file_get_contents("php://input"), true);
@@ -63,7 +38,7 @@ $teacherId = $db->lastInsertId();
 // Insert trainings
 if (!empty($data["trainings"])) {
   $stmt = $db->prepare("
-    INSERT INTO trainings (teacher_id, title, date, venue)
+    INSERT INTO trainings (teacher_id, title, date, level)
     VALUES (?, ?, ?, ?)
   ");
   foreach ($data["trainings"] as $training) {
@@ -71,7 +46,7 @@ if (!empty($data["trainings"])) {
       $teacherId,
       $training["title"],
       $training["date"],
-      $training["venue"]
+      $training["level"] ?? $training["venue"] // Handle legacy 'venue' field
     ]);
   }
 }
@@ -80,22 +55,28 @@ if (!empty($data["trainings"])) {
 if (!empty($data["educations"])) {
   $stmt = $db->prepare("
     INSERT INTO education (
-      teacher_id, level, degree, major, school,
-      status, title_or_units, from_year, to_year, honors
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      teacher_id, type, degree, major, school,
+      status, year_attended, details
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   ");
   foreach ($data["educations"] as $edu) {
+    // Determine education type based on degree
+    $type = 'bachelor';
+    if (stripos($edu["degree"], 'master') !== false || stripos($edu["degree"], 'ma ') !== false) {
+      $type = 'master';
+    } elseif (stripos($edu["degree"], 'doctor') !== false || stripos($edu["degree"], 'phd') !== false) {
+      $type = 'doctoral';
+    }
+    
     $stmt->execute([
       $teacherId,
-      $edu["level"],
+      $type,
       $edu["degree"],
       $edu["major"],
       $edu["school"],
       $edu["status"] ?? '',
-      $edu["titleOrUnits"] ?? '',
-      $edu["fromYear"] ?? '',
-      $edu["toYear"] ?? '',
-      $edu["honors"] ?? ''
+      $edu["fromYear"] ?? $edu["toYear"] ?? '',
+      $edu["titleOrUnits"] ?? $edu["honors"] ?? ''
     ]);
   }
 }
