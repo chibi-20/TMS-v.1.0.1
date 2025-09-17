@@ -97,6 +97,298 @@ header h1 {
 #closeModal:hover {
   color: var(--primary-color);
 }
+
+/* Responsive Table Styles */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+/* Mobile-first responsive table */
+@media screen and (max-width: 768px) {
+  .table-responsive {
+    border: 0;
+    box-shadow: none;
+  }
+  
+  #teacherTable {
+    border: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+  
+  #teacherTable thead {
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  
+  #teacherTable tr {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    display: block;
+    margin-bottom: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  #teacherTable td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    display: block;
+    font-size: 0.9em;
+    text-align: left !important;
+    padding: 8px 0;
+    position: relative;
+    padding-left: 35%;
+  }
+  
+  #teacherTable td:before {
+    content: attr(data-label);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    width: 30%;
+    padding-right: 10px;
+    white-space: nowrap;
+    color: var(--primary-color);
+    font-size: 0.85em;
+  }
+  
+  #teacherTable td:last-child {
+    border-bottom: none;
+  }
+  
+  /* Action buttons in mobile */
+  #teacherTable td .delete-btn,
+  #teacherTable td .view-details-btn,
+  #teacherTable td .edit-btn {
+    display: inline-block;
+    margin: 2px 3px;
+    padding: 5px 10px;
+    font-size: 0.8em;
+  }
+}
+
+/* Tablet responsive adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  #teacherTable {
+    font-size: 0.9em;
+  }
+  
+  #teacherTable th,
+  #teacherTable td {
+    padding: 10px 8px;
+  }
+  
+  .delete-btn, .view-details-btn, .edit-btn {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    margin: 1px 2px;
+  }
+}
+
+/* Large screen optimizations */
+@media screen and (min-width: 1025px) {
+  .table-responsive {
+    overflow-x: visible;
+  }
+}
+
+/* Summary Tables Responsive Styles */
+@media screen and (max-width: 768px) {
+  /* Main container adjustments */
+  .container {
+    padding: 10px;
+    margin: 0;
+  }
+  
+  /* Header responsiveness */
+  header {
+    padding: 15px;
+    text-align: center;
+  }
+  
+  header h1 {
+    font-size: 1.2em;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .header-logo {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+  
+  .controls {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  /* Filter controls */
+  #teacherSearch,
+  #positionFilter,
+  #yearsFilter,
+  #trainingsFilter,
+  #educationFilter,
+  #gradeLevelFilter,
+  #departmentFilter,
+  #schoolYearSelect {
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Tab navigation */
+  .tabs {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .tab {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+  }
+  
+  /* Summary tables */
+  .summary-table {
+    border: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .summary-table thead {
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  
+  .summary-table tr {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+  
+  .summary-table td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    display: block;
+    font-size: 0.9em;
+    text-align: left !important;
+    padding: 5px 0;
+    position: relative;
+    padding-left: 50%;
+  }
+  
+  .summary-table td:before {
+    content: attr(data-label);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    color: var(--primary-color);
+    font-size: 0.85em;
+  }
+  
+  .summary-table td:last-child {
+    border-bottom: none;
+  }
+  
+  /* Summary table containers */
+  .summary-tables-container {
+    padding: 10px;
+  }
+  
+  .summary-table-item {
+    margin-bottom: 20px;
+  }
+  
+  .summary-table-item h3 {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+  }
+  
+  /* Charts container */
+  .charts-container {
+    flex-direction: column;
+    padding: 10px;
+  }
+  
+  .chart-wrapper {
+    margin-bottom: 20px;
+    max-width: 100%;
+  }
+  
+  /* Department cards responsive */
+  .department-cards-container {
+    padding: 10px;
+    gap: 15px;
+  }
+  
+  .department-card {
+    min-width: 200px;
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+
+/* Tablet-specific adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 15px;
+  }
+  
+  header h1 {
+    font-size: 1.4em;
+  }
+  
+  .department-cards-container {
+    gap: 15px;
+  }
+  
+  .department-card {
+    min-width: 220px;
+    max-width: 280px;
+  }
+  
+  /* Filter controls in rows */
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  
+  .filter-row select,
+  .filter-row input {
+    flex: 1;
+    min-width: 150px;
+  }
+}
+
 /* Center summary section headers */
 section h2, section h3 {
   text-align: center;

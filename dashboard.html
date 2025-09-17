@@ -124,25 +124,27 @@
       </select>
       <div id="teacherList">
       <div id="teacherTableList">
-        <table id="teacherTable">
-          <thead>
-            <tr>
-              <th onclick="sortTable(0)">Full Name</th>
-              <th onclick="sortTable(1)">Position</th>
-              <th onclick="sortTable(2)">Grade Level</th>
-              <th onclick="sortTable(3)">Department</th>
-              <th onclick="sortTable(4)">Years in Teaching</th>
-              <th onclick="sortTable(5)">IPCRF Rating</th>
-              <th onclick="sortTable(6)">School Year</th>
-              <th>Trainings Attended</th>
-              <th>Educational Attainment</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Populated dynamically -->
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table id="teacherTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable(0)">Full Name</th>
+                <th onclick="sortTable(1)">Position</th>
+                <th onclick="sortTable(2)">Grade Level</th>
+                <th onclick="sortTable(3)">Department</th>
+                <th onclick="sortTable(4)">Years in Teaching</th>
+                <th onclick="sortTable(5)">IPCRF Rating</th>
+                <th onclick="sortTable(6)">School Year</th>
+                <th>Trainings Attended</th>
+                <th>Educational Attainment</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
       </div>
       <!-- Modal for viewing details -->
       <div id="detailsModal" class="modal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);justify-content:center;align-items:center;">

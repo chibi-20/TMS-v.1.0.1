@@ -223,16 +223,16 @@ document.addEventListener('DOMContentLoaded', () => {
     filteredTeachers.forEach(teacher => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${teacher.full_name}</td>
-        <td>${teacher.position}</td>
-        <td>${teacher.grade_level || ''}</td>
-        <td>${teacher.department || ''}</td>
-        <td>${teacher.years_in_teaching}</td>
-        <td>${teacher.ipcrf_rating}</td>
-        <td>${teacher.school_year}</td>
-        <td>${Array.isArray(teacher.trainings) ? getTrainingLevels(teacher.trainings) : ''}</td>
-        <td>${Array.isArray(teacher.education) ? teacher.education.map(e => e.degree).join(', ') : ''}</td>
-        <td>
+        <td data-label="Full Name">${teacher.full_name}</td>
+        <td data-label="Position">${teacher.position}</td>
+        <td data-label="Grade Level">${teacher.grade_level || ''}</td>
+        <td data-label="Department">${teacher.department || ''}</td>
+        <td data-label="Years in Teaching">${teacher.years_in_teaching}</td>
+        <td data-label="IPCRF Rating">${teacher.ipcrf_rating}</td>
+        <td data-label="School Year">${teacher.school_year}</td>
+        <td data-label="Trainings Attended">${Array.isArray(teacher.trainings) ? getTrainingLevels(teacher.trainings) : ''}</td>
+        <td data-label="Educational Attainment">${Array.isArray(teacher.education) ? teacher.education.map(e => e.degree).join(', ') : ''}</td>
+        <td data-label="Action">
           <button class="view-details-btn" data-id="${teacher.id}">View Details</button>
           <button class="edit-btn" data-id="${teacher.id}">Edit</button>
           <button class="delete-btn" data-id="${teacher.id}">Delete</button>
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   let posTable = `<table class="summary-table"><thead><tr><th>Position</th><th>Number of Teachers</th></tr></thead><tbody>`;
     Object.entries(positionCounts).forEach(([pos, count]) => {
-      posTable += `<tr><td>${pos}</td><td>${count}</td></tr>`;
+      posTable += `<tr><td data-label="Position">${pos}</td><td data-label="Number of Teachers">${count}</td></tr>`;
     });
     posTable += `</tbody></table>`;
     const posDiv = document.getElementById('positionSummaryTable');
@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     let gradeLevelTable = `<table class="summary-table"><thead><tr><th>Grade Level</th><th>Number of Teachers</th></tr></thead><tbody>`;
     Object.entries(gradeLevelCounts).forEach(([grade, count]) => {
-      gradeLevelTable += `<tr><td>${grade}</td><td>${count}</td></tr>`;
+      gradeLevelTable += `<tr><td data-label="Grade Level">${grade}</td><td data-label="Number of Teachers">${count}</td></tr>`;
     });
     gradeLevelTable += `</tbody></table>`;
     const gradeLevelDiv = document.getElementById('gradeLevelSummaryTable');
@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     let departmentTable = `<table class="summary-table"><thead><tr><th>Department</th><th>Number of Teachers</th></tr></thead><tbody>`;
     Object.entries(departmentCounts).forEach(([dept, count]) => {
-      departmentTable += `<tr><td>${dept}</td><td>${count}</td></tr>`;
+      departmentTable += `<tr><td data-label="Department">${dept}</td><td data-label="Number of Teachers">${count}</td></tr>`;
     });
     departmentTable += `</tbody></table>`;
     const departmentDiv = document.getElementById('departmentSummaryTable');
@@ -716,8 +716,8 @@ document.addEventListener('DOMContentLoaded', () => {
     yearRanges.forEach(r => posYearTable += `<th>${r} yrs</th>`);
     posYearTable += `</tr></thead><tbody>`;
     Object.entries(posYearCounts).forEach(([pos, counts]) => {
-      posYearTable += `<tr><td>${pos}</td>`;
-      counts.forEach(c => posYearTable += `<td>${c}</td>`);
+      posYearTable += `<tr><td data-label="Position">${pos}</td>`;
+      counts.forEach((c, idx) => posYearTable += `<td data-label="${yearRanges[idx]} yrs">${c}</td>`);
       posYearTable += `</tr>`;
     });
     posYearTable += `</tbody></table>`;
@@ -737,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let seminarTable = `<table class="summary-table"><thead><tr>`;
     seminarLevels.forEach(lvl => seminarTable += `<th>${lvl}</th>`);
     seminarTable += `</tr></thead><tbody><tr>`;
-    seminarLevels.forEach(lvl => seminarTable += `<td>${seminarCounts[lvl]}</td>`);
+    seminarLevels.forEach(lvl => seminarTable += `<td data-label="${lvl}">${seminarCounts[lvl]}</td>`);
     seminarTable += `</tr></tbody></table>`;
     const seminarDiv = document.getElementById('seminarSummaryTable');
     if (seminarDiv) seminarDiv.innerHTML = seminarTable;
@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let degreeTable = `<table class="summary-table"><thead><tr>
       <th>Bachelor's Only</th><th>Masteral</th><th>Doctoral</th>
       </tr></thead><tbody><tr>
-      <td>${bachelorsOnly}</td><td>${masteral}</td><td>${doctoral}</td>
+      <td data-label="Bachelor's Only">${bachelorsOnly}</td><td data-label="Masteral">${masteral}</td><td data-label="Doctoral">${doctoral}</td>
       </tr></tbody></table>`;
     const degreeDiv = document.getElementById('degreeSummaryTable');
     if (degreeDiv) degreeDiv.innerHTML = degreeTable;
