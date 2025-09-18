@@ -1,4 +1,10 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', 'debug_log.txt');
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -10,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    error_log("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;
 }
@@ -18,27 +25,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once 'config.php';
 
 try {
+    // Connect to MySQL database using PDO
     $db = getDBConnection();
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
-    exit;
-}
     
     // Get form data
     $teacherId = $_POST['teacherId'] ?? '';
     $fullName = $_POST['fullName'] ?? '';
     $position = $_POST['position'] ?? '';
-    $gradeLevel = $_POST['gradeLevel'] ?? '';
-    $department = $_POST['department'] ?? '';
     $yearsInTeaching = $_POST['yearsInTeaching'] ?? '';
     $ipcrfRating = $_POST['ipcrfRating'] ?? '';
     $schoolYear = $_POST['schoolYear'] ?? '';
     $trainingData = $_POST['trainingData'] ?? '';
     $educationData = $_POST['educationData'] ?? '';
 
+    // Log received data for debugging
+    error_log("Update teacher request - ID: $teacherId, Name: $fullName");
+
     // Validate required fields
-    if (empty($teacherId) || empty($fullName) || empty($position) || empty($gradeLevel) || empty($department) || empty($yearsInTeaching) || empty($ipcrfRating) || empty($schoolYear)) {
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+    if (empty($teacherId) || empty($fullName) || empty($position) || empty($yearsInTeaching) || empty($ipcrfRating) || empty($schoolYear)) {
+        $missing = [];
+        if (empty($teacherId)) $missing[] = 'teacherId';
+        if (empty($fullName)) $missing[] = 'fullName';
+        if (empty($position)) $missing[] = 'position';
+        if (empty($yearsInTeaching)) $missing[] = 'yearsInTeaching';
+        if (empty($ipcrfRating)) $missing[] = 'ipcrfRating';
+        if (empty($schoolYear)) $missing[] = 'schoolYear';
+        
+        $errorMsg = 'Missing required fields: ' . implode(', ', $missing);
+        error_log($errorMsg);
+        echo json_encode(['success' => false, 'message' => $errorMsg]);
         exit;
     }
 
@@ -46,12 +61,10 @@ try {
     $db->beginTransaction();
 
     // Update teacher record
-    $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, grade_level = ?, department = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
+    $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
     $result = $stmt->execute([
         $fullName,
         $position,
-        $gradeLevel,
-        $department,
         $yearsInTeaching,
         $ipcrfRating,
         $schoolYear,
@@ -62,9 +75,18 @@ try {
         throw new Exception('Failed to update teacher record');
     }
 
+    // Check if teacher was actually updated
+    if ($stmt->rowCount() === 0) {
+        error_log("No teacher found with ID: $teacherId");
+        throw new Exception('No teacher found with the specified ID');
+    }
+
     // Delete existing trainings and education records
-    $db->prepare("DELETE FROM trainings WHERE teacher_id = ?")->execute([$teacherId]);
-    $db->prepare("DELETE FROM education WHERE teacher_id = ?")->execute([$teacherId]);
+    $deleteTraining = $db->prepare("DELETE FROM trainings WHERE teacher_id = ?");
+    $deleteTraining->execute([$teacherId]);
+
+    $deleteEducation = $db->prepare("DELETE FROM education WHERE teacher_id = ?");
+    $deleteEducation->execute([$teacherId]);
 
     // Insert training data
     if (!empty($trainingData)) {
@@ -88,20 +110,11 @@ try {
     if (!empty($educationData)) {
         $educations = json_decode($educationData, true);
         if (is_array($educations)) {
-            $stmt = $db->prepare('INSERT INTO education (teacher_id, type, degree, school, major, year_attended, status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt = $db->prepare('INSERT INTO education (teacher_id, degree, school, major, year_attended, status, details) VALUES (?, ?, ?, ?, ?, ?, ?)');
             foreach ($educations as $education) {
                 if (!empty($education['degree']) && !empty($education['school']) && !empty($education['major'])) {
-                    // Determine education type based on degree
-                    $type = 'bachelor';
-                    if (stripos($education['degree'], 'master') !== false || stripos($education['degree'], 'ma ') !== false) {
-                        $type = 'master';
-                    } elseif (stripos($education['degree'], 'doctor') !== false || stripos($education['degree'], 'phd') !== false) {
-                        $type = 'doctoral';
-                    }
-                    
                     $stmt->execute([
                         $teacherId,
-                        $type,
                         $education['degree'],
                         $education['school'],
                         $education['major'],
@@ -117,15 +130,17 @@ try {
     // Commit transaction
     $db->commit();
     
+    error_log("Teacher updated successfully - ID: $teacherId");
     echo json_encode(['success' => true, 'message' => 'Teacher updated successfully']);
 
 } catch (Exception $e) {
     // Rollback transaction on error
-    if (isset($db)) {
-        $db->rollback();
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
     }
     
-    error_log("Update teacher error: " . $e->getMessage());
+    $errorMsg = "Update teacher error: " . $e->getMessage();
+    error_log($errorMsg);
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
 ?>
