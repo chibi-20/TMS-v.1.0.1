@@ -112,9 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
           yearRanges.map(r => `<option value="${r}">${r} yrs</option>`).join('');
       }
 
-      // Populate trainings filter (by level: School-Based, Division, Region, National, International)
+      // Populate trainings filter (by level: School-Based, Division, Regional, National, International)
       if (trainingsFilter) {
-        const trainingLevels = ['School-Based', 'Division', 'Region', 'National', 'International'];
+        const trainingLevels = ['School-Based', 'Division', 'Regional', 'National', 'International'];
         trainingsFilter.innerHTML = '<option value="">All Trainings</option>' +
           trainingLevels.map(lvl => `<option value="${lvl}">${lvl}</option>`).join('');
       }
@@ -725,8 +725,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (posYearDiv) posYearDiv.innerHTML = posYearTable;
 
     // --- 5. Table: Seminar/Training Attendance by Level ---
-    const seminarLevels = ['School-Based', 'Division', 'Region', 'National', 'International'];
-    const seminarCounts = { 'School-Based': 0, 'Division': 0, 'Region': 0, 'National': 0, 'International': 0 };
+    const seminarLevels = ['School-Based', 'Division', 'Regional', 'National', 'International'];
+    const seminarCounts = { 'School-Based': 0, 'Division': 0, 'Regional': 0, 'National': 0, 'International': 0 };
     teachers.forEach(t => {
       if (Array.isArray(t.trainings)) {
         t.trainings.forEach(tr => {
@@ -846,7 +846,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <select class="training-level" required>
         <option value="">Select Level</option>
         <option value="School-Based" ${level === 'School-Based' ? 'selected' : ''}>School-Based</option>
-        <option value="District" ${level === 'District' ? 'selected' : ''}>District</option>
         <option value="Division" ${level === 'Division' ? 'selected' : ''}>Division</option>
         <option value="Regional" ${level === 'Regional' ? 'selected' : ''}>Regional</option>
         <option value="National" ${level === 'National' ? 'selected' : ''}>National</option>

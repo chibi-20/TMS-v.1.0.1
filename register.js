@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <select class="training-level" required>
         <option value="">Select Level</option>
         <option value="School-Based">School-Based</option>
-        <option value="District">District</option>
         <option value="Division">Division</option>
         <option value="Regional">Regional</option>
         <option value="National">National</option>
