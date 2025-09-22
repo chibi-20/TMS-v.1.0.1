@@ -41,7 +41,8 @@ try {
     $educationData = $_POST['educationData'] ?? '';
 
     // Log received data for debugging
-    error_log("Update teacher request - ID: $teacherId, Name: $fullName");
+    error_log("Update teacher request - ID: $teacherId, Name: $fullName, Grade: $gradeLevel, Department: $department");
+    error_log("Teacher ID type: " . gettype($teacherId) . ", value: '$teacherId'");
 
     // Validate required fields
     if (empty($teacherId) || empty($fullName) || empty($position) || empty($yearsInTeaching) || empty($ipcrfRating) || empty($schoolYear)) {
@@ -62,6 +63,14 @@ try {
     // Begin transaction
     $db->beginTransaction();
 
+    // First, check if the teacher exists
+    $checkStmt = $db->prepare('SELECT id FROM teachers WHERE id = ?');
+    $checkStmt->execute([$teacherId]);
+    if ($checkStmt->rowCount() === 0) {
+        error_log("Teacher not found with ID: $teacherId");
+        throw new Exception('Teacher not found with the specified ID');
+    }
+
     // Update teacher record
     $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, grade_level = ?, department = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
     $result = $stmt->execute([
@@ -79,11 +88,7 @@ try {
         throw new Exception('Failed to update teacher record');
     }
 
-    // Check if teacher was actually updated
-    if ($stmt->rowCount() === 0) {
-        error_log("No teacher found with ID: $teacherId");
-        throw new Exception('No teacher found with the specified ID');
-    }
+    error_log("Teacher update executed successfully for ID: $teacherId");
 
     // Delete existing trainings and education records
     $deleteTraining = $db->prepare("DELETE FROM trainings WHERE teacher_id = ?");
