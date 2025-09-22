@@ -43,6 +43,7 @@ try {
     // Log received data for debugging
     error_log("Update teacher request - ID: $teacherId, Name: $fullName, Grade: $gradeLevel, Department: $department");
     error_log("Teacher ID type: " . gettype($teacherId) . ", value: '$teacherId'");
+    error_log("All POST data: " . print_r($_POST, true));
 
     // Validate required fields
     if (empty($teacherId) || empty($fullName) || empty($position) || empty($yearsInTeaching) || empty($ipcrfRating) || empty($schoolYear)) {
@@ -64,9 +65,23 @@ try {
     $db->beginTransaction();
 
     // First, check if the teacher exists
-    $checkStmt = $db->prepare('SELECT id FROM teachers WHERE id = ?');
+    $checkStmt = $db->prepare('SELECT id, full_name FROM teachers WHERE id = ?');
     $checkStmt->execute([$teacherId]);
+    $foundTeacher = $checkStmt->fetch();
+    error_log("Looking for teacher ID: $teacherId, Found: " . ($foundTeacher ? "YES (ID: {$foundTeacher['id']}, Name: {$foundTeacher['full_name']})" : "NO"));
+    
     if ($checkStmt->rowCount() === 0) {
+        // Let's also try to see what IDs actually exist
+        $allTeachers = $db->query('SELECT id, full_name FROM teachers ORDER BY id LIMIT 10')->fetchAll(PDO::FETCH_ASSOC);
+        $teacherList = array_map(function($t) { return "ID:{$t['id']} - {$t['full_name']}"; }, $allTeachers);
+        error_log("Available teachers (first 10): " . implode(', ', $teacherList));
+        
+        // Also try with string conversion
+        $checkStmt2 = $db->prepare('SELECT id, full_name FROM teachers WHERE CAST(id AS CHAR) = ?');
+        $checkStmt2->execute([$teacherId]);
+        $foundTeacher2 = $checkStmt2->fetch();
+        error_log("String comparison result: " . ($foundTeacher2 ? "FOUND with string cast" : "NOT FOUND with string cast"));
+        
         error_log("Teacher not found with ID: $teacherId");
         throw new Exception('Teacher not found with the specified ID');
     }
