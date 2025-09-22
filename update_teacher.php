@@ -32,6 +32,8 @@ try {
     $teacherId = $_POST['teacherId'] ?? '';
     $fullName = $_POST['fullName'] ?? '';
     $position = $_POST['position'] ?? '';
+    $gradeLevel = $_POST['gradeLevel'] ?? '';
+    $department = $_POST['department'] ?? '';
     $yearsInTeaching = $_POST['yearsInTeaching'] ?? '';
     $ipcrfRating = $_POST['ipcrfRating'] ?? '';
     $schoolYear = $_POST['schoolYear'] ?? '';
@@ -61,10 +63,12 @@ try {
     $db->beginTransaction();
 
     // Update teacher record
-    $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
+    $stmt = $db->prepare('UPDATE teachers SET full_name = ?, position = ?, grade_level = ?, department = ?, years_in_teaching = ?, ipcrf_rating = ?, school_year = ? WHERE id = ?');
     $result = $stmt->execute([
         $fullName,
         $position,
+        $gradeLevel,
+        $department,
         $yearsInTeaching,
         $ipcrfRating,
         $schoolYear,
